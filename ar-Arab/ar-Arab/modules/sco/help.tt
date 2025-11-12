@@ -1,0 +1,61 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Self checkout help &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha [% END %]</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta content="كوها [% Version | html %]" name="generator" /> <!-- leave this for stats -->
+<link rel="shortcut icon" href="[% IF ( Koha.Preference('OpacFavicon')  ) %][% Koha.Preference('OpacFavicon') | url %][% ELSE %][% interface | html %]/[% theme | html %]/images/favicon.ico[% END %]" type="image/x-icon" />
+[% Asset.css("lib/jquery/jquery-ui-1.12.1.css") | $raw %]
+[% Asset.css("lib/font-awesome/css/font-awesome.min.css") | $raw %]
+[% Asset.css("css/sco.css") | $raw %]
+[% IF ( Koha.Preference('OPACUserCSS') ) %]<style>[% Koha.Preference('OPACUserCSS') | $raw %]</style>[% END %]
+[% IF ( SCOUserCSS ) %]<style>[% SCOUserCSS | $raw %]</style>[% END %]
+<script>
+    function _(s) { return s } // dummy function for gettext
+</script>
+[% Asset.js("lib/modernizr.min.js") | $raw %]
+</head>
+<body id="sco_help" class="sco">
+ [% INCLUDE 'masthead-sco.inc' %]
+
+ <div class="main">
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <h1>مساعدة الإعارة الذاتية</h1>
+
+ [% IF ( SelfCheckHelpMessage ) %]
+ <div id="selfcheckhelpmessage">
+ [% SelfCheckHelpMessage | $raw %]
+ </div>
+ [% END %]
+
+ <p>إذا كانت هذه هي المرة الأولى لك لاستخدام نظام الإعارة الذاتية، أو إذا كان النظام لا يتصرف كما كان متوقعاً، بإمكانك العودة إلى هذا الدليل لتتمكن من البدء.</p>
+
+ <h2>الخطوة الأولى: أدخل  معرف المستخدم الخاص بك [% IF ( SelfCheckoutByLogin ) %] وكللمة المرور[% END %]</h2>
+
+ <p>ادخل معرف المستخدم الخاص بك[% IF ( SelfCheckoutByLogin ) %] وكلمة المرور[% END %]،وتضغط على زر إرسال (او اضغط على مفتاح الدخول).</p>
+
+ <h2>الخطوة الثانية : قم بمسح الباركود لكل مادة، مادة واحدة في كل مرة</h2>
+
+ <p>قم بمسح كل مادة ضوئياً ثم انتظر إعادة تحميل الصفحة قبل مسح المادة التـــالية ضوئياً، يجب أن تظهر المادة المعارة في قائمة المواد المعار، يجب النقر على زر تقديم فقط في حالة إدخال الباركود يدوياً.</p>
+
+ <h2>الخطوة الثالثة: انقرعلى زر 'الانتهاء'</h2>
+
+ <p>إذا لم تنقر فوق زر 'إنهاء' سوف تنتهي جلسة العمل الخاصة بك بشكل تلقائي في غضون [% SelfCheckTimeout | html %] ثواني.</p>
+
+ <div class="button">
+ <a href="javascript:history.go(-1)">العودة إلى الإعارة الذاتية</a>
+ </div>
+
+ </div> <!-- / .col -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% IF ( SCOUserJS ) %]<script>[% SCOUserJS | $raw %]</script>[% END %]
+[% END %]

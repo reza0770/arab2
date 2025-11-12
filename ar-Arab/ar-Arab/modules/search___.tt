@@ -1,0 +1,512 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE Branches %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Advanced search &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+<style>
+.title_summary{
+	background-color: #f0f3f3;
+	border:1px solid;
+	margin:5px;
+	padding:5px
+}
+
+</style>
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='advsearch' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<body id="cat_z3950_search" class="cat">
+
+
+ <div class="container-fluid">
+
+
+<form name="searchform" method="get" action="/cgi-bin/koha/result.pl" id="searchform" style="margin: 0 auto;">
+
+	<!-- khakdaman -->
+
+	<div class="row">
+		<div id="searchtitle" style="margin: 0px auto;">
+			<!-- <img src="/opac-tmpl/bootstrap/images/unionsearch.png" style="max-width: 100%;"
+				alt="جستجو در منابع کتابخانه های عراق" style="margin: 0px auto;display: block;"
+				title="جستجو در منابع کتابخانه های عراق"> -->
+		</div>
+	</div>
+	<!-- khakdaman -->
+
+
+	<div class="col-sm-auto order-2 order-sm-2 idx_div" style="padding:0px;" id="filter_search_top">
+		<input id="rad1" type="radio" name="idx" value="" checked="checked">
+		<label for="rad1">
+			<span class="checkmark">
+
+			</span>كافة الحقول</label>
+		<input id="rad2" type="radio" name="idx" value="ti">
+		<label for="rad2">
+			<span class="checkmark">
+
+			</span> عنوان </label>
+		<input id="rad3" type="radio" name="idx" value="au">
+		<label for="rad3">
+			<span class="checkmark">
+
+			</span> مؤلف </label>
+		<input id="rad4" type="radio" name="idx" value="su">
+		<label for="rad4">
+			<span class="checkmark">
+
+			</span> موضوع </label>
+		<!-- khakdman -->
+		<!-- <input id="rad5" type="radio" name="idx" value="nb" /> -->
+		<!-- <label for="rad5">
+<span class="checkmark">
+
+</span> تدمك </label>
+<input id="rad6" type="radio" name="idx" value="ns" />
+<label for="rad6">
+<span class="checkmark">
+
+</span> السلاسل </label>
+<input id="rad7" type="radio" name="idx" value="callnum,phr" />
+<label for="rad7">
+<span class="checkmark">
+
+</span> رقم الطلب </label> -->
+		<!-- khakdman -->
+	</div>
+	<div class="form-row align-items-center" id="m">
+		<div class="col-sm-auto order-1 order-sm-1" style="display:none;">
+			<label for="masthead_search"></label>
+		</div>
+
+		<div class="col-sm-auto order-2 order-sm-2" style="display:none">
+
+
+
+			<select name="idx2" id="masthead_search" class="form-control">
+				
+				<option value="">فهرس المكتبة</option>
+				
+				
+				<option value="ti">عنوان</option>
+				
+				
+				<option value="au">مؤلف</option>
+				
+				
+				<option value="su">الموضوع</option>
+				
+				
+				<option value="nb">تدمك</option>
+				
+				
+				<option value="ns">تدمد</option>
+				
+				
+				<option value="se">السلاسل</option>
+				
+				
+				
+				<option value="callnum,phr">رقم الطلب</option>
+				
+				
+			</select>
+		</div> <!-- /.col-sm-auto -->
+		<style>
+			/* khakdman */
+			.transl2 {
+				margin-bottom: 0px !important;
+			}
+
+			.div-transl2 {
+
+				padding-left: 0px !important;
+				padding-right: 0px !important;
+				margin-bottom: 0px !important;
+			}
+
+			.div-transl2 select {
+				margin-bottom: 0px !important;
+			}
+
+			.search-sm-filter {
+				display: none;
+			}
+
+			@media screen and (max-width: 375px) {
+
+				#m input,
+				#m select {
+					font-size: 3.6vw;
+				}
+			}
+
+			@media screen and (max-width: 773px) {
+
+				.search-sm-filter {
+					display: inherit;
+				}
+
+				.search-sm-filter-libarary {
+					flex: 0 0 33.33%;
+					max-width: 33.33%;
+				}
+
+				.search-sm-filters {
+					-ms-flex: 0 0 100%;
+					flex: 0 0 100%;
+					max-width: 100%;
+					order: 2;
+				}
+
+				.search-sm-filters-order-5 {
+					-ms-flex: 0 0 100%;
+					flex: 0 0 100%;
+					max-width: 100%;
+					order: 5;
+				}
+
+			}
+
+			/* khakdman */
+		</style>
+		<div class="col order-4 order-sm-3 div-transl2">
+			
+			<input class="col-12 transl1 transl2 form-control" id="translControl1" name="q" autocomplete="on" placeholder="ادخل عبارة البحث هنا" title="ادخل عبارة البحث هنا" type="text">
+			<span id="translControl">
+
+			</span>
+			
+			<script>
+				function auto_complit_responcive(x) {
+					console.log(x);
+					if (x.matches) {
+					document.getElementById('translControl1').setAttribute('autocomplete','off')
+					}else{
+					document.getElementById('translControl1').setAttribute('autocomplete','on')
+					}
+				}
+
+				var x = window.matchMedia("(max-width: 900px)")
+				auto_complit_responcive(x) // Call listener function at run time
+				x.addListener(auto_complit_responcive) // Attach listener function on state changes 
+			</script>
+		</div> <!-- /.col -->
+
+		
+		<div class="col-sm-3 col-md-3 col-lg-2 order-3 order-sm-4 div-transl2 search-sm-filters">
+			<div class="row">
+				<!-- khakdaman -->
+
+				<select name="branch_group_limit" id="select_library" class="form-control col-12  search-sm-filter-libarary">
+					<option value="">كل المكتبات</option>
+
+					<optgroup label="المكتبات">
+
+						
+						
+						<option value="branch:mtuedu">الجامعة التقنية الوسطى
+						</option>
+						
+						
+						
+						<option value="branch:uotech">الجامعة التكنولوجية	
+						</option>
+						
+						
+						
+						<option value="branch:IHL">العتبة الحسينية
+						</option>
+						
+						
+						
+						<option value="branch:IHL2">العتبة الحسينية فرع بابل
+						</option>
+						
+						
+						
+						<option value="branch:IHLAB">العتبة العباسية المقدسة
+						</option>
+						
+						
+						
+						<option value="branch:ubas_cl">جامعة البصرة
+						</option>
+						
+						
+						
+						<option value="branch:MPL">جامعة القادسية
+						</option>
+						
+						
+						
+						<option value="branch:uokufa">جامعة الكوفة
+						</option>
+						
+						
+						
+						<option value="branch:muthanna_u">جامعة المثنى
+						</option>
+						
+						
+						
+						<option value="branch:iqbamu">جامعة المستنصرية
+						</option>
+						
+						
+						
+						<option value="branch:iqhilub">جامعة بابل
+						</option>
+						
+						
+						
+						<option value="branch:CBAGU">جامعة بغداد
+						</option>
+						
+						
+						
+						<option value="branch:CLKU">جامعة كربلاء
+						</option>
+						
+						
+						
+						<option value="branch:wasit">جامعة واسط
+						</option>
+						
+						
+						
+						<option value="branch:dartnj">دار التراث
+						</option>
+						
+						
+						
+						<option value="branch:SPL">دار الكتب والوثائق العراقية
+						</option>
+						
+						
+						
+						<option value="branch:PVL">فرع البصرة
+						</option>
+						
+						
+						
+						<option value="branch:FRL">فرع واسط
+						</option>
+						
+						
+						
+						<option value="branch:digi1">كتابخانه رقمي 1
+						</option>
+						
+						
+						
+						<option value="branch:FTL.LB.">مؤسسة علوم نهج البلاغة
+						</option>
+						
+						
+						
+						<option value="branch:alnahrain">مركز النهرين للدراسات الاستراتيجية
+						</option>
+						
+						
+						
+						<option value="branch:m_alamain">معهد العلمين
+						</option>
+						
+						
+						
+						<option value="branch:ih2njf">مكتبة الإمام الحسن عليه السلام
+						</option>
+						
+						
+						
+						<option value="branch:hakimnj">مكتبة الامام الحكيم العامة
+						</option>
+						
+						
+
+						
+					</optgroup>
+					<optgroup label="مجموعات">
+						
+						
+						<option value="multibranchlimit-2">كربلاء المقدسة</option>
+						
+						
+					</optgroup>
+					
+				</select> <!-- /#select_library -->
+
+				<select name="idx2" class="form-control col search-sm-filter">
+					
+					<option value="">فهرس المكتبة</option>
+					
+					
+					<option value="ti">عنوان</option>
+					
+					
+					<option value="au">مؤلف</option>
+					
+					
+					<option value="su">الموضوع</option>
+					
+					
+					<option value="nb">تدمك</option>
+					
+					
+					<option value="ns">تدمد</option>
+					
+					
+					<option value="se">السلاسل</option>
+					
+					
+					
+					<option value="callnum,phr">رقم الطلب</option>
+					
+					
+				</select>
+				<select name="limit" class="form-control col search-sm-filter">
+
+					<option selected="" value="">
+				بحث عام
+				</option>
+				
+				<option value="TH">
+				الرسائل والاطاريح
+				</option>
+				
+				<option value="CR">
+				السلاسل والمجلات والحوليات
+				</option>
+				
+				<option value="MS">
+				المخطوطات
+				</option>
+				
+				<option value="MP">
+				خرائط
+				</option>
+				
+				<option value="BK">
+				كتاب
+				</option>
+				
+				<option value="CF">
+				ملف حاسوب
+				</option>
+				
+				</select>
+				<!-- /khakdaman -->
+			</div>
+		</div> <!-- /.col-sm-auto -->
+
+
+
+
+		<!-- khakdaman -->
+		<div class="col-sm-auto  search-sm-filters-order-5 order-5" style="padding-left: 0px;padding-right: 0px;">
+			<button type="submit" id="searchsubmit" class="btn btn-warning col-12 ">
+				<i aria-hidden="true" class="fa fa-search text-white">
+
+				</i>
+			</button>
+		</div>
+		
+	</div> <!-- /.form-row -->
+	<input type="hidden" name="weight_search" value="1">
+
+
+
+	<!-- /khakdaman -->
+
+
+
+
+
+
+
+
+	<div class="col-sm-auto order-2 order-sm-2 idx_div idx_div2 " style="padding:0px;" id="filter_search_bottom">
+		<input id="ccc" type="radio" name="limit" value="" checked="checked">
+		<label for="ccc">بحث عام</label>
+		
+		
+		<input id="TH" type="radio" name="limit" value="TH">
+		<label for="TH">الرسائل والاطاريح</label>
+		
+		<input id="CR" type="radio" name="limit" value="CR">
+		<label for="CR">السلاسل والمجلات والحوليات</label>
+		
+		<input id="MS" type="radio" name="limit" value="MS">
+		<label for="MS">المخطوطات</label>
+		
+		<input id="MP" type="radio" name="limit" value="MP">
+		<label for="MP">خرائط</label>
+		
+		<input id="BK" type="radio" name="limit" value="BK">
+		<label for="BK">كتاب</label>
+		
+		<input id="CF" type="radio" name="limit" value="CF">
+		<label for="CF">ملف حاسوب</label>
+		
+
+	</div>
+
+
+
+
+</form>
+
+
+
+
+ [% IF ( breeding_loop ) %]
+
+
+
+
+ <!-- /#resultst -->
+
+ <div id="dataPreview" class="modal" tabindex="-1" role="dialog" aria-labelledby="dataPreviewLabel" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">×</button>
+ <h3 id="dataPreviewLabel">معاينة</h3>
+ </div>
+ <div class="modal-body">
+ <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> تحميل</div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ 
+
+ 
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'columns_settings.inc' %]
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'z3950_search.inc' %]
+ [% Asset.js("js/z3950_search.js") | $raw %]
+ <script>
+        $(document).ready(function(){
+            
+        });
+
+        function columnsInit(){
+            $(".dataTables_info").text( $("#result_pagenumbers").text() );
+            $("#result_pagenumbers").hide();
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

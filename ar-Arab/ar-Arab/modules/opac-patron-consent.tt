@@ -1,0 +1,101 @@
+[% USE Koha %]
+[% SET consentview = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Your consents &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-patron-consent' %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-user.pl">[% patron.firstname | html %] [% patron.surname | html %]</a>
+ </li>
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">موافقاتك</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
+ </div>
+ </div>
+ <div class="col-lg-10 order-first order-md-first order-lg-2">
+ <div id="patronconsents" class="maincontent">
+
+ [% IF Koha.Preference('GDPR_Policy') %]
+ <div class="alert alert-warning">
+ <p>لكي تستمر في تسجيل الدخول، نحتاج إلى موافقتك على معالجة بياناتك الشخصية كما هو موضح في قانون الاتحاد الأوروبي لحماية البيانات العامة في الخامس والعشرين من مايو عام 2018.</p>
+ <p>يرجى حفظ موافقتك أدناه أو تسجيل الخروج. شكرا لك!</p>
+ </div>
+ [% END %]
+
+ <h1>موافقاتك</h1>
+
+ <form action="/cgi-bin/koha/opac-patron-consent.pl" method="post">
+ [% IF Koha.Preference('GDPR_Policy') %]
+ <h2 id="GDPR_consents">موافقات GDPR </h2>
+ <input type="hidden" name="op" value="gdpr_proc_save"/>
+ <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]"/>
+ <fieldset>
+ <ul><li>
+ <p>لقد قمت بقراءة<a target="_blank" href="[% Koha.Preference('PrivacyPolicyURL') | url %]">سياسة الخصوصية</a> وأوافق على معالجتك لبياناتي الشخصية كما هو مبيّن هنا.</p>
+ <p><input type="radio" name="gdpr_processing" value="agreed"> نعم أوافق.<br>
+ <input type="radio" name="gdpr_processing" value="disagreed"> لا، غير موافق. يرجى إزالة حسابي خلال مدة زمنية معقولة.</p>
+ [% IF gdpr_proc_consent %]
+ <p>تم تسجيل موافقتك في [% gdpr_proc_consent | html %].</p>
+ [% ELSIF gdpr_proc_refusal %]
+ <p>لقد قمت بالإشارة مؤخرًا إلى عدم موافقتك، وسوف نستكمل معالجة طلبك في أقرب وقب.</p>
+ [% END %]
+ </li></ul>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" id="saveconsent" type="submit" value="إحفظ" />
+ </fieldset>
+ [% END %]
+
+ </form>
+
+ </div> <!-- / #userpasswd -->
+ </div> <!-- / .col-lg-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+</div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ <script>
+        var consent = null;
+        $(document).ready(function() {
+            [% IF gdpr_proc_consent %]
+                consent=1;
+                $("input[type='radio'][value='agreed']").prop('checked',true);
+                $(".alert").hide();
+            [% ELSIF gdpr_proc_refusal %]
+                consent=0;
+                $("input[type='radio'][value='disagreed']").prop('checked',true);
+            [% ELSE %]
+            [% END %]
+            $("#saveconsent").prop('disabled', true);
+
+            $("input[type='radio']").click(function() {
+                var radio = $(this).val();
+                if(radio=='agreed' && (consent==null || consent==0)) $("#saveconsent").prop('disabled', false);
+                if(radio=='disagreed' && (consent==null || consent==1)) $("#saveconsent").prop('disabled', false);
+                if(radio=='agreed') $(".alert").hide();
+                if(radio=='disagreed') $(".alert").show();
+            });
+
+        });
+    </script>
+[% END %]

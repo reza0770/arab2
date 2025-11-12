@@ -1,0 +1,312 @@
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Full subscription history for [% bibliotitle | html %] &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+ [% FILTER collapse %]
+ <style>
+        div.tabsub {
+            clear: both;
+        }
+        #filterform label {
+            font-weight: bold;
+        }
+        #filterform select {
+            width: 100%;
+        }
+        #subtabs a {
+            display: block;
+            float: left;
+            border: 1px solid #CCC;
+            padding: .2em .4em;
+            margin: .3em;
+            text-decoration: none;
+            font-size: 115%;
+        }
+
+        #subtabs strong {
+            display: block;
+            float: left;
+            font-size: 115%;
+            padding: .2em .4em;
+            margin: 0.3em 0;
+        }
+
+        #subtabs {
+            margin-top: 1em;
+        }
+        .action .btn {
+            font-size: 90%;
+            width: 100%;
+        }
+        .menu-collapse {
+            padding: .5em;
+        }
+        a.currentsubtab {
+            background-color: #FFC;
+        }
+    </style>
+ [% END %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-full-serial-issues' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | uri %]">تفاصيل لـ [% bibliotitle | html %]</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="#">سِجل الاشتراك الكامل</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="searchfacetscontainer">
+ <div id="search-facets">
+ <form action="/cgi-bin/koha/opac-serial-issues.pl" id="filterform">
+ <h2><a href="#" class="menu-collapse-toggle">تنقيح بحثك</a></h2>
+ <ul class="menu-collapse">
+ <li>
+ <label for="libraryfilter">المكتبة : </label>
+ <select id="libraryfilter" name="libraryfilter"></select>
+ <label for="subscriptionidfilter">الاشتراك:</label>
+ <select id="subscriptionidfilter" name="subscriptionfilter" disabled="disabled"></select>
+ </li>
+ <li class="action">
+ <input class="btn btn-primary" id="reset" type="reset" value="مسح" />
+ </li>
+ </ul>
+ </form>
+ </div> <!-- / #search-facets -->
+ </div> <!-- / #searchfacetscontainer -->
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div> <!-- / .col-lg-2 -->
+ <div class="col-10 order-first order-md-first order-lg-2">
+ <div id="fullserialissues" class="maincontent">
+ [% UNLESS ( popup ) %]
+ <h1>سِجل الاشتراك الكامل لـ [% bibliotitle | html %]</h1>
+ <div id="views">
+ <span class="view"><a id="Normalview" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | html %]">عرض عادي</a></span>
+ <span class="view"><a id="Briefhistory" href="/cgi-bin/koha/opac-serial-issues.pl?biblionumber=[% biblionumber | html %]&amp;selectview=small">سِجل مختصر</a></span>
+ <span class="view"><span id="Fullhistory">السِجل الكامل</span></span>
+ </div>
+ [% END %]
+
+ <div id="subtabs">
+ <strong>عرض السنة : </strong>
+ [% FOREACH year IN years %]
+ [% IF ( year.year ) %]
+ <a class="tabsubs" href="#" onclick="showlayer([% year.year | html %]); return false;">[% year.year | html %]</a>
+ [% END %]
+ [% END %]
+ </div>
+
+ [% FOREACH year IN years %]
+ [% IF loop.first %]
+ <div class="yeardata tabsub" id="show[% year.year | html %]" style="display:block">
+ [% ELSE %]
+ <div class="yeardata tabsub" id="show[% year.year | html %]" style="display:none">
+ [% END %]
+ <table class="subscriptionstclass table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th>التاريخ</th>
+ <th>مكتبة</th>
+ <th>ملاحظات</th>
+ <th>تاريخ الإستلام</th>
+ <th>عدد</th>
+ <th>حالة</th>
+ <th>الإشتراكات</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH serial IN year.serials %]
+ <tr>
+ <td data-order="[% serial.publisheddate | html %]">
+ [% IF ( serial.publisheddate ) %]
+ [% IF serial.publisheddatetext %]
+ [% serial.publisheddatetext | html %]
+ [% ELSE %]
+ [% serial.publisheddate | $KohaDates %]
+ [% END %]
+ [% ELSE %]
+ &nbsp;
+ [% END %]
+ </td>
+ <td class="libraryfilterclass">[% Branches.GetName( serial.branchcode ) | html %]</td>
+ <td>[% serial.notes | html %]</td>
+ [% IF ( serial.status2 && serial.planneddate ) %]
+ <td data-order="[% serial.planneddate | html %]">
+ [% serial.planneddate | $KohaDates %]
+ [% ELSE %]
+ <td data-order="9999-12-31">
+ &nbsp;
+ [% END %]
+ </td>
+ <td>[% serial.serialseq | html %]</td>
+ <td>
+ [% IF ( serial.status1 ) %]متوقع[% END %] [% IF ( serial.status2 ) %]وصل[% END %] [% IF ( serial.status3 ) %]متأخر[% END %] [% IF ( serial.status4 ) %]مفقود[% END %] [% IF ( serial.status41 ) %]مفقود (لم يصل مطلقا)[% END %] [% IF ( serial.status42 ) %]مفقود (مباع)[% END %] [% IF ( serial.status43 ) %]مفقود (تالف)[% END %] [% IF ( serial.status44 ) %]مفقود (ضائع)[% END %] [% IF ( serial.status5 ) %]غير متاح[% END %] [% IF ( serial.status6 ) %]حذف[% END %] [% IF ( serial.status7 ) %]مطالب به[% END %] [% IF ( serial.status8 ) %]موقوف[% END %]</td>
+ <td class="subscriptionidfilterclass">[% serial.subscriptionid | html %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div> <!-- / .yeardata tabsub -->
+ [% END # / FOREACH year %]
+ </div> <!-- / #fullserialissues -->
+ </div> <!-- / .col-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script>
+        $(document).ready(function(){
+            showlayer([% yearmin | html %]);
+            $("a.tabsubs:first").addClass("currentsubtab");
+            $("#filterform").submit(function(){
+                filterByLibrary();
+                return false;
+            });
+            $("#libraryfilter").change(function(){
+                filterByLibrary();
+            });
+            $("#subscriptionidfilter").change(function(){
+                filterBySubscriptionId();
+            });
+            $("#reset").click(function(){
+                clearFilters();
+            });
+            $("a.tabsubs").click(function(){
+                $("a.tabsubs").removeClass("currentsubtab");
+                $(this).addClass("currentsubtab");
+            });
+            $(".subscriptionstclass").dataTable($.extend(true, {}, dataTablesDefaults, {
+                "order": [[ 0, "desc" ]]
+            }));
+        });
+
+        // Filters initialization
+        function initFilters() {
+            // Deleting everything from the library filter
+            $("#libraryfilter option").remove();
+
+            // Getting each branchcode from the currently displayed tab
+            var subarray = [];
+            $("div#" + currentYear + " table.subscriptionstclass tbody tr:visible td.libraryfilterclass").each(function() {
+                if (subarray.indexOf($(this).text()) == -1) { subarray.push($(this).text()); }
+            });
+
+            // Setting the option values with branchcodes
+            $("#libraryfilter").append('<option value="all">'+_("(الكل)")+'</option>');
+            for (var i = 0; i < subarray.length; i++) {
+                $("#libraryfilter").append('<option value="' + subarray[i] + '">' + subarray[i] + '</option>');
+            }
+        }
+
+        // Filter by Library
+        function filterByLibrary() {
+
+            selectedStatus = $("#libraryfilter").val();
+
+            // Reset the filters but keeps the selected library
+            clearFilters(true);
+
+            if (selectedStatus != 'all') {
+
+                // We hide everything
+            $("table.subscriptionstclass tbody tr").hide();
+
+            // Then show the lines that match the currently selected library
+            $("table.subscriptionstclass tbody tr td.libraryfilterclass:contains(" + selectedStatus + ")").parent().show();
+
+
+            // We then prepare the subscription filter :
+
+            // Getting subscription id's for the selected library
+            var subarray = [];
+            $("div#" + currentYear + " table.subscriptionstclass tbody tr:visible td.subscriptionidfilterclass").each(function() {
+                if (subarray.indexOf($(this).text()) == -1) { subarray.push($(this).text()); }
+            });
+            // Setting the option values with subscription id's
+            $("#subscriptionidfilter").append('<option value="all">'+_("(الكل)")+'</option>');
+            for (var i = 0; i < subarray.length; i++) {
+                $("#subscriptionidfilter").append('<option value="' + subarray[i] + '">' + subarray[i] + '</option>');
+            }
+
+            // Subscription filtering is now ready
+            $("#subscriptionidfilter").removeAttr("disabled");
+            }
+        }
+
+        // Filter by subscription id
+        function filterBySubscriptionId() {
+
+            selectedSubscription = $("#subscriptionidfilter").val();
+            selectedLibrary      = $("#libraryfilter").val();
+
+            if (selectedSubscription == "all") {
+            clearFilters(true);
+            filterByLibrary();
+            } else {
+
+            // We hide everything
+            $("table.subscriptionstclass tbody tr").hide();
+
+            // Then show the lines that match the currently selected library
+            $("table.subscriptionstclass tbody tr td.libraryfilterclass:contains(" + selectedLibrary + ")").parent().show();
+
+            // Then hide the lines where the subscription id does not match the selected one
+            $("table.subscriptionstclass tbody tr td.subscriptionidfilterclass").not(
+                $("table.subscriptionstclass tbody tr td.subscriptionidfilterclass:contains(" + selectedSubscription + ")")
+            ).parent().hide();
+            }
+        }
+
+        // Clears filters : reset everything
+        // (Though preserves the selected library if the keeplibrary parameter is set to true)
+        function clearFilters(keeplibrary) {
+            // Show all content
+            $("table.subscriptionstclass tbody tr").show();
+
+            // Remove old subscription options
+            $("#subscriptionidfilter option").remove();
+            $("#subscriptionidfilter option").append('<option value="all">'+_("(الكل)")+'</option>');
+            $("#subscriptionidfilter").attr("disabled", "disabled");
+
+            if (keeplibrary != true) {
+            // Reinit library options
+            initFilters();
+            $("#libraryfilter option[value=all]").attr("selected", "selected");
+            }
+        }
+
+        function showlayer(numlayer){
+            $(".yeardata").each(function(){
+                ong = $(this).attr("id");
+                if(ong == "show"+numlayer){
+                    $(this).show();
+                    currentYear = ong;
+                } else  {
+                    $(this).hide();
+                }
+            });
+            clearFilters();
+        }
+    </script>
+[% END %]

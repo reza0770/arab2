@@ -1,0 +1,57 @@
+[% USE Koha %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title> [% IF ( typeissue ) %]Subscribe to a subscription alert [% ELSIF ( typeissuecancel ) %] Unsubscribe from a subscription alert [% END %] &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-alert-subscribe' %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <ul class="breadcrumb">
+ <li><a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a></li>
+ <li><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | uri %]">تفاصيل لـ [% bibliotitle | html %]</a></li>
+ <li><a href="#">[% IF ( typeissue ) %]الاشتراك في تنبيه الاشتراك [% ELSIF ( typeissuecancel ) %]إلغاء الاشتراك في تنبيه الاشتراك [% END %]</a></li>
+ </ul>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <div id="useralertsubscribe" class="maincontent">
+ <h1>Subscription alerts</h1>
+ [% IF ( typeissue ) %]
+ <h2>الاشتراك في تنبيهات الاشتراك</h2>
+ <form action="opac-alert-subscribe.pl" method="post">
+ <p>هل تريد إستلام بريد إلكترونيه عند وصول عدد جديدة لهذا الاشتراك؟</p>
+ <h3>[% bibliotitle | html %]</h3>
+ [% IF ( notes ) %]<p>[% notes | html %]</p>[% END %]
+ <input type="hidden" name="subscriptionid" value="[% subscriptionid | html %]">
+ <input type="hidden" name="referer" value="[% referer | html %]">
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]">
+ <input type="hidden" name="op" value="alert_confirmed">
+ <input class="btn btn-primary" type="submit" value="نعم">
+ <a class="cancel" href="opac-serial-issues.pl?biblionumber=[% biblionumber | html %]" >لا</a>
+ </form>
+ [% END %]
+ [% IF ( typeissuecancel ) %]
+ <h2>إلغاء الاشتراك من تنبيه الاشتراك</h2>
+ <form action="opac-alert-subscribe.pl" method="post">
+ <p>الرجاء التأكد من أنك لا تريد استلام رسائل البريد الإلكتروني عند وصول عدد جديد لهذا الإشتراك.</p>
+ <h3>[% bibliotitle | html %]</h3>
+ [% IF ( notes ) %]<p>[% notes | html %]</p>[% END %]
+ <input type="hidden" name="subscriptionid" value="[% subscriptionid | html %]">
+ <input type="hidden" name="referer" value="[% referer | html %]">
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]">
+ <input type="hidden" name="op" value="cancel_confirmed">
+ <input class="btn btn-primary" type="submit" value="نعم">
+ <a href="opac-serial-issues.pl?biblionumber=[% biblionumber | uri %]" class="cancel">لا</a>
+ </form>
+ [% END %]
+ </div> <!-- / #useralertsubscribe -->
+ </div> <!-- / .span10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

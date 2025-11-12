@@ -1,0 +1,196 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Tags &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+ <style>
+        fieldset { padding : .3em;margin:.3em 0;}
+        #tagcloud    {background-color: #F3F3F3; text-align: justify;padding:7px;}
+        .tag a       {text-decoration: none;}
+        .tag a:hover {text-decoration: underline;}
+        .tag         {display: block; padding-left: 1em;}
+        .tagcount    {display: none;}
+        .cloudweight {display: none;}
+        .tagweight {
+            display: none;
+            position: relative;
+            bottom: 0.4em;
+            color: red;
+            font-size: 12px;
+        }
+    </style>
+[% END %]
+</head>
+[% IF ( loggedinusername ) %][% INCLUDE 'bodytag.inc' bodyid='opac-usertags' bodyclass='scrollto' %][% ELSE %][% INCLUDE 'bodytag.inc' bodyid='opac-tags' bodyclass='scrollto' %][% END %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ [% IF ( loggedinusername ) %]
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ </li>
+ [% END %]
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">الوسوم</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav||loggedinusername ) %]
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
+ </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+
+ <div id="usertags" class="maincontent">
+ <h1>كافة الوسوم</h1>
+ [% IF ( ERRORS ) %]
+ [% FOREACH ERROR IN ERRORS %]
+ <div class="alert alert-warning">
+ لقد حدثت مشكلة في هذه العملية: [% IF ( ERROR.badparam ) %] الخطأ: معامل غير مسموح [% ERROR.badparam | html %] [% ELSIF ( ERROR.login ) %] خطأ: يجب عليك تسجيل الدخول لاستكمال الإجراء. [% ELSIF ( ERROR.failed_delete ) %] خطأ: لا يمكنك حذف الوسم [% ERROR.failed_delete | html %]. <br />ملاحظة: يمكنك حذف الوسوم الخاصة بك فقط. [% ELSIF ( ERROR.scrubbed ) %] ملاحظة: تحتوي وسيمتك على رمز دو علامة وتم حذفها. <br />تمت إضافة الوسم كـ &quot;[% ERROR.scrubbed | html %]&quot;. [% ELSIF ( ERROR.scrubbed_all_bad ) %] ملاحظة: كانت وسيمتك بالكامل رمز ذو علامة.لم تتم إضافته<br />الرجاء المحاولة مرة ثانية مع نص عادي. [% ELSE %]خطأ غير معروف. [% END %] </div>
+ [% END %]
+ [% END # /IF ERRORS %]
+
+ <form method="get" action="opac-tags.pl" class="form-inline">
+ <fieldset>
+ <div class="form-inline">
+ <label>
+ [% IF Koha.Preference( 'opacuserlogin' ) == 1 %] وسوم للعرض من مستخدمين آخرين: [% ELSE %] وسوم للعرض: [% END %]</label>
+ <input type="text" name="limit" class="form-control form-control-sm mr-2" maxlength="4" size="4" value="[% limit or "100" | html %]" />
+ <input class="btn btn-sm btn-primary" type="submit" value="صحيح" />
+ </div>
+ [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
+ [% UNLESS ( loggedinusername ) %]
+ <p>
+ [% IF Koha.Preference('casAuthentication') %]
+ [%# CAS authentication is too complicated for modal window %]
+ <a href="/cgi-bin/koha/opac-user.pl">قم بتسجيل الدخول لترى وسومك المحفوظة.</a>
+ [% ELSE %]
+ <a class="loginModal-trigger" href="/cgi-bin/koha/opac-user.pl">قم بتسجيل الدخول لترى وسومك المحفوظة.</a>
+ [% END %]
+ </p>
+ [% END %]
+ [% END %]
+ </fieldset>
+ </form>
+
+ [% IF ( TAGLOOP ) %]
+ <div id="tagcloud">
+ [% FOREACH TAGLOO IN TAGLOOP %]
+ <span class="tag tagweight[% TAGLOO.stratum | html %]" id="tag[% loop.count | html %]" style="display:inline;">
+ <a href="/cgi-bin/koha/opac-search.pl?tag=[% TAGLOO.term |url %]&amp;q=[% TAGLOO.term |url %]">[% TAGLOO.term | html %]</a>
+ <span class="tagweight">[% TAGLOO.weight_total | html %]</span>
+ </span>
+ [% END %]
+ </div>
+ [% END # / TAGLOOP%]
+ [% IF ( add_op ) %]
+ [% IF ( added_count ) %]
+ <div class="dialog message">تمت إضافة [% added_count | html %] [% IF ( added_count == 1 ) %]الوسم[% ELSE %]الوسوم[% END %] بنجاح</div>
+ [% END %]
+ [% IF ( deleted_count ) %]
+ <div class="dialog message">تم حذف [% deleted_count | html %] [% IF ( deleted_count == 1 ) %]الوسم[% ELSE %]الوسوم[% END %] بنجاح</div>
+ [% END %]
+ [% END # /add_op %]
+
+ [% IF ( MY_TAGS ) %]
+ <form id="deletetags" method="post" action="opac-tags.pl">
+ <table id="mytagst" class="table table-bordered table-striped">
+ <caption>وسومك</caption>
+ <thead>
+ <tr>
+ <th>&nbsp;</th>
+ <th>مصطلح</th>
+ <th class="anti-the">عنوان</th>
+ <th>تمت إضافة التاريخ</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH MY_TAG IN MY_TAGS %]
+ [% IF MY_TAG.visible %]
+ <tr>
+ <td class="selectcol">
+ <input type="checkbox" name="del[% MY_TAG.tag_id | html %]" value="del[% MY_TAG.tag_id | html %]">
+ </td>
+ <td class="tagterm">
+ <span class="tdlabel">الوسم:</span>
+ [% IF MY_TAG.approved == 1 %]
+ <a href="/cgi-bin/koha/opac-search.pl?tag=[% MY_TAG.term |url %]&amp;q=[% MY_TAG.term |url %]">[% MY_TAG.term | html %]</a>
+ [% ELSE %] [% MY_TAG.term | html %] (غير مقبول) [% END %]</td>
+ <td>
+ [% IF ( MY_TAG.XSLTBloc ) %]
+ [% MY_TAG.XSLTBloc | $raw %]
+ [% ELSE %]
+ <span class="tdlabel">العنوان:</span>
+ <a class="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% MY_TAG.biblionumber | html %]">
+ [% INCLUDE 'biblio-title.inc' biblio=MY_TAG %]
+ </a>
+ [% IF ( MY_TAG.author ) %] بواسطة [% MY_TAG.author | html %] [% END %] [% END # /IF MY_TAG.XSLTBloc %] [% INCLUDE 'title-actions-menu.inc' items=MY_TAG %] </td>
+ <td data-order="[% MY_TAG.date_created | html %]">
+ <span class="tdlabel">تاريخ الإضافة:</span>
+ [% MY_TAG.date_created | $KohaDates %]
+ </td>
+ </tr>
+ [% END %]
+ [% END %]
+ </tbody>
+ </table>
+ <input class="btn btn-danger btn-sm delete" type="submit" value="حذف الوسوم المحددة">
+ </form>
+ [% END # /MY_TAGS %]
+ </div> <!-- / .usertags -->
+ </div> <!-- / .span10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% INCLUDE 'datatables.inc' %]
+<script>
+
+    function checkboxesChecked() {
+        if ($("#deletetags input:checkbox:checked").length > 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    $(document).ready(function(){
+        var MSG_DELETE_TAG = _("هل أنت متأكد من أنك تريد حف الوسم (الوسوم) المحددة؟");
+        $(".delete").on("click", function(e){
+            if ( checkboxesChecked() == 1 ) {
+                return confirmDelete(MSG_DELETE_TAG);
+            } else {
+                alert(_("يرجى تحديد وسم لحذفه"));
+                e.preventDefault();
+            }
+        });
+
+        $("#mytagst").dataTable($.extend(true, {}, dataTablesDefaults, {
+            "sorting": [[ 2, "asc" ]],
+            "columnDefs": [
+                { "targets": [ 0 ], "sortable": false, "searchable": false },
+                { "sType": "anti-the", "aTargets" : [ "anti-the" ] }
+            ]
+        }));
+    });
+
+</script>
+[% END %]

@@ -1,0 +1,245 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Categories %]
+[% USE KohaNews %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacLoginInstructions = KohaNews.get( location => "OpacLoginInstructions", lang => lang, library => branchcode ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>
+[% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
+ Log in to your account
+[% ELSE %]
+ Catalog login disabled
+[% END %] &rsaquo;
+ [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-login-page' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="#">تسجيل الدخول</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row justify-content-center">
+ <div class="col-md-10 col-lg-6">
+ <div id="opac-auth" class="maincontent">
+ <!--CONTENT-->
+ [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
+ [% IF ( nopermission ) %]
+ <!-- This is what is displayed if user doesn't have permission -->
+ <div class="alert alert-warning">
+ <h1>غير مسموح بالدخول</h1>
+ <p>عذرا ، النظام لا يرى أنك تمتلك الصلاحية للوصول لهذه الصفحة. </p>
+ [% IF SCO_login %]
+ <p><a href="/cgi-bin/koha/sco/sco-main.pl?logout.x=1">تسجيل الخروج والمحاولة مرة أخرى بمستفيد آخر</a></p>
+ [% ELSIF SCI_login %]
+ <p><a href="/cgi-bin/koha/sci/sci-main.pl?logout.x=1">تسجيل الخروج والمحاولة مرة أخرى بمستفيد آخر</a></p>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF ( loginprompt ) %]
+ <!-- login prompt time-->
+ <h1>تسجيل الدخول إلى حسابك</h1>
+
+ [% IF ( timed_out ) %]
+ <!-- This is what is displayed if login has timed out -->
+ <div class="alert alert-info">
+ <p>.عذرا ، انتهت مدة جلستك، يرجى تسجيل الدخول من جديد.</p>
+ </div>
+ [% END %]
+
+ [% IF ( different_ip ) %]
+ <!-- This is what is displayed if user doesn't have permission -->
+ <div class="alert alert-info">
+ <p>لقد استعملت عنوان IP مختلف, الرجاء تسجيل الدخول مرة أخرى.</p>
+ </div>
+ [% END %]
+
+
+ [% IF invalid_username_or_password || too_many_login_attempts %]
+ <!-- This is what is displayed if user doesn't have permission or account is locked. (Do not expose more information than needed.) -->
+ <div class="alert alert-info">
+ <p>لقد قمت بإدخال اسم مستخدم أو كلمة مرور غير صحيحة. يرجى إعادة المحاولة! لكن لاحظ أن كلمة المرور حساسة لحالة الأحرف[% IF Koha.Preference('FailedLoginAttempts') %] وأن حسابك سيتم غلقه بعد عدد محدد من محاولات تسجيل الدخول غير الناجحة[% END %]. يرجى الاتصال بأحد موظفي مكتبتك إذا استمرت المشكلة.</p>
+ </div>
+ [% END %]
+
+ [% IF ( shibbolethAuthentication ) %]
+ [% IF ( invalidShibLogin ) %]
+ <!-- This is what is displayed if shibboleth login has failed to match a koha user -->
+ <div class="alert alert-info">
+ <p>عذرا، هوية Shibboleth الخاصة بك لا تطابق هوية مكتبة صحيحة. </p>
+ [% UNLESS ( Koha.Preference('OPACShibOnly') ) %]
+ [% IF ( casAuthentication ) %]
+ [% IF ( invalidCasLogin ) %]
+ <!-- This is what is displayed if cas login has failed -->
+ <p>عذراً، تسجيل دخول CAS فشل أيضا، إذا كان لديك تسجيل دخول محلي يمكنك استخدامه أدناه.</p>
+ [% ELSE %]
+ <p>إذا كان لديك حساب CAS، يمكنك استخدام ذلك أدناه.</p>
+ [% END %]
+ [% ELSE %]
+ <p> إذا كان لديك تسجيل دخول محلي يمكنك استخدامه أدناه.</p>
+ [% END %]
+ [% END %]
+ </div>
+ [% ELSE %]
+ <h2>تسجيل دخول Shibboleth </h2>
+ <p><a href="[% shibbolethLoginUrl | $raw %]">Log in using a Shibboleth account.</a></p>
+ [% END # /IF invalidShibLogin %]
+ [% UNLESS ( Koha.Preference('OPACShibOnly') ) %]
+ [% IF ( casAuthentication ) %]
+ <h2>تسجيل دخول CAS</h2>
+ <p>إذا لم يكن لديك حساب Shibboleth ، لكن لديك حساب CAS ، يمكنك استخدام CAS. </p>
+ [% ELSE %]
+ <h2>تسجيل دخول محلِّي</h2>
+ <p>إذا لم يكن لديك حساب Shibboleth، لكن لديك حساب محلي، يمكنك تسجيل الدخول أدناه</p>
+ [% END %]
+ [% END %]
+ [% END # /IF shibbolethAuthentication %]
+
+ [% UNLESS ( Koha.Preference('OPACShibOnly') ) %]
+ [% IF ( casAuthentication ) %]
+ [% IF ( shibbolethAuthentication ) %]
+ [% IF ( casServerUrl ) %]
+ <p><a href="[% casServerUrl | $raw %]">Log in.</a><p>
+ [% END %]
+
+ [% IF ( casServersLoop ) %]
+ <p> يرجى اختيار مقابل أي منها تريد تأكيد الثقة:</p>
+ <ul>
+ [% FOREACH casServer IN casServersLoop %]
+ <li><a href="[% casServer.value | $raw %]">[% casServer.name | html %]</a></li>
+ [% END %]
+ </ul>
+ [% END %]
+ [% ELSE %]
+ <h2>تسجيل دخول CAS</h2>
+
+ [% IF ( invalidCasLogin ) %]
+ <!-- This is what is displayed if cas login has failed -->
+ <p>عذرا، لقد فشل تسجيل دخول CAS</p>
+ [% END %]
+
+ [% IF ( casServerUrl ) %]
+ <p><a href="[% casServerUrl | $raw %]">Log in using a CAS account.</a><p>
+ [% END %]
+
+ [% IF ( casServersLoop ) %]
+ <p>إذا كان لديك حساب CAS، يرجى اختيار مقابل أي حساب تريد تأكيد الثقة:</p>
+ <ul>
+ [% FOREACH casServer IN casServersLoop %]
+ <li><a href="[% casServer.value | $raw %]">[% casServer.name | html %]</a></li>
+ [% END %]
+ </ul>
+ [% END %]
+ [% END # /IF shibbolethAuthentication %]
+
+ [% IF ( shibbolethAuthentication ) %]
+ <p>لا شيء</p>
+ [% ELSE %]
+ <h2>تسجيل دخول محلِّي</h2>
+ <p>إذا لم يكن لديك حساب CAS، لكن يوجد لديك حساب محلي، لا يزال بإمكانك تسجيل الدخول:</p>
+ [% END %]
+
+ [% END # / IF casAuthentication %]
+
+ [% IF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
+ [% IF ( invalidGoogleOpenIDConnectLogin ) %]
+ <h2>تسحيل دخول باستخدام جوجل</h2>
+ <p>عذرا، لقد فشل تسجيل دخولك باستخدام جوجل<span class="error">[% invalidGoogleOpenIDConnectLogin | html %]</span></p>
+ <p>يرجى ملاحظة أن الدخول باستخدام جوجل سيعمل فقط في حالة استخدام عنوان البريد الإلكتروني المسجل بهذه المكتبة.</p>
+ <p>اذا كنت تريد، يمكنك المحاولة<a href="/cgi-bin/koha/svc/auth/googleopenidconnect?reauthenticate=select_account">قم بالدخول ياستخدام حساب مختلف</a>
+ [% END %]
+ <a href="/cgi-bin/koha/svc/auth/googleopenidconnect" class="btn btn-primary" id="openid_connect">أدخل باستخدام جوجل</a>
+ <p>إذا لم يكن لديك حساب جوجل، لكن يوجد لديك حساب محلي، لا يزال بإمكانك تسجيل الدخول:</p>
+ [% END # /IF GoogleOpenIDConnect %]
+ [% END # /UNLESS OPACShibOnly %]
+
+ [% IF !Koha.Preference('OPACShibOnly') or SCO_login or SCI_login %]
+ [% IF SCO_login %]
+ <form action="/cgi-bin/koha/sco/sco-main.pl" name="auth" id="auth" method="post" autocomplete="off">
+ [% ELSIF SCI_login %]
+ <form action="/cgi-bin/koha/sci/sci-main.pl" name="auth" id="auth" method="post" autocomplete="off">
+ [% ELSE %]
+ <form action="[% script_name | html %]" name="auth" id="auth" method="post" autocomplete="off">
+ [% END %]
+ <input type="hidden" name="koha_login_context" value="opac" />
+
+ <fieldset class="brief">
+ [% FOREACH INPUT IN INPUTS %]
+ [% NEXT IF INPUT.name == 'logout.x' %]
+ <input type="hidden" name="[% INPUT.name | html %]" value="[% INPUT.value | html %]" />
+ [% END %]
+ <div class="form-group">
+ <label for="userid">تسجيل دخول</label>
+ <input class="form-control" type="text"  size="25" id="userid"  name="userid" />
+ </div>
+ <div class="form-group">
+ <label for="password">كلمة المرور</label>
+ <input class="form-control" type="password"  size="25" id="password"  name="password" />
+ </div>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="تسجيل الدخول" />
+ </fieldset>
+ </fieldset>
+
+ [% IF Koha.Preference('OpacPasswordChange') && Categories.can_any_reset_password %]
+ <div id="forgotpassword">
+ <a href="/cgi-bin/koha/opac-password-recovery.pl">نسيت كلمة مرورك؟</a>
+ </div>
+ [% END %]
+ <div id="nologininstructions">
+ [% IF ( OpacLoginInstructions ) %]
+ [% PROCESS koha_news_block news => OpacLoginInstructions %]
+ [% ELSE %]
+ <h2>أليس لديك كلمة سر بعد ؟</h2>
+ <p>إذا لم يكن لديك كلمة سر بعد ، إطلبها من مكتب الإعارة في المرة القادمة التي ستزور بها المكتبة . وسنكون سعداء ﻹعداد واحدة لك .</p>
+ <h2>هل تملك بطاقة المكتبة؟</h2>
+ <p>إذا لم يكن لديك بطاقة مكتبية، قم بالذهاب إلى مكتبتك المحلية للتسجيل</p>
+ [% END # / IF  OpacLoginInstructions %]
+
+ [% IF PatronSelfRegistration && PatronSelfRegistrationDefaultCategory %]
+ <span id="registrationinstructions">
+ <a href="/cgi-bin/koha/opac-memberentry.pl">يمكنك من التسجيل هنا.</a>
+ </span>
+ [% END %]
+ </div>
+ </form>
+ [% END # / IF !OPACShibOnly or SCO_login or SCI_login %]
+ [% END # / IF loginprompt %]
+
+ [% ELSE %]
+ <h1>لم تقم المكتبة بتفعيل تسجيل الدخول إلى الفهرس</h1>
+ <ul>
+ <li>للتبليغ عن هذا الخطأ، يمكنك إرسال بريد الكتروني إلى إدارة كوها<a href="mailto:[% admin | uri %]">البريد الإلكترونى:</a></li>
+ <li>إستخدم شريط القائمة العلوى للتجوّل إلى الجزء الآخر لكوها.</li>
+ </ul>
+ [% END # / IF opacuserlogin %]
+
+ </div> <!-- /.opac-auth -->
+ </div> <!-- /.col-md-10 col-lg-6 -->
+ </div> <!-- /.row -->
+ </div> <!-- /.container-fluid -->
+</div> <!-- /.main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+<script>
+    // Hide circular 'Log in to Your Account' link in opac-auth.pl
+    $(document).ready(function() {
+        if ( $("#auth" ) ) { $("#members ul li a").hide(); }
+    });
+</script>
+[% END %]

@@ -1,0 +1,47 @@
+[% USE Koha %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]كوها على الخط المباشر[% END %] الفهرس</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-confirmation-pending' %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="#">تسجيل حساب جديد</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav ) %]
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+ <div id="registration-confirmation-error" class="maincontent">
+ <div class="alert alert-warning">
+ <h1>فشل التسجيل!</h1>
+
+ <p> هناك مشاكل معالجة في تسجيلك. يرجى الاتصال بالمكتبة للحصول على مساعدة.</p>
+ </div>
+ </div> <!-- /#registration-confirmation-error -->
+ </div> <!-- /.col-lg-10/12 -->
+ </div> <!-- /.row -->
+ </div> <!-- /.container-fluid -->
+ </div> <!-- /.main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

@@ -1,0 +1,93 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% PROCESS 'opac-authorities.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Entry [% authtypetext | html %] &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-authoritiesdetail' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-authorities-home.pl">بحث الاستناد</a>
+ </li>
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">دخول [% authtypetext | html %]</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-lg-10 order-first order-md-first order-lg-2">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+ <div id="userauthMARCdetails" class="maincontent">
+ <div id="views">
+ <span class="view">
+ <a id="Normalview" href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% authid | html %]">عرض عادي</a>
+ </span>
+ <span class="view">
+ <span id="MARCview">عرض مارك</span>
+ </span>
+ </div>
+
+ [% IF ( displayhierarchy ) %]
+ <div id="hierarchies">
+ [% PROCESS showhierarchy trees = loophierarchies %]
+ </div>
+ [% END %]
+
+ <h1>دخول [% authtypetext | html %]</h1>
+ <p><a href="opac-search.pl?type=opac&amp;q=[% authid | uri %]&amp;idx=an,phr">عدد التسجيلات المستخدمة: [% count | html %]</a></p>
+ [% FOREACH Tag0X IN Tab0XX %]
+ <p><strong>[% Tag0X.tag | html %]</strong></p>
+ <ul>
+ [% FOREACH subfiel IN Tag0X.subfield %]
+ <li><strong>[% subfiel.marc_lib | $raw %]:</strong>
+ [% IF subfiel.isurl %]<a href="[% subfiel.marc_value | url %]">[% subfiel.marc_value | html %]</a>
+ [% ELSE %][% subfiel.marc_value | html %][% END %]</li>
+ [% END %]
+ </ul>
+ [% END %]
+ </div> <!-- / #userauthMARCdetails -->
+ </div> <!-- / .col-lg-10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% Asset.js("lib/jquery/plugins/jquery.jstree.js") | $raw %]
+ <script>
+        $(document).ready(function() {
+            [% IF ( displayhierarchy ) %]
+                var current_nodes = [];
+                $('.currentauth').each(function() {
+                    current_nodes.push('#' + $(this).parent().parents('li:first').attr('id'));
+                    });
+                $('#hierarchies').jstree({
+                        "plugins": [ "themes", "html_data"],
+                        "themes": { "theme": "classic",
+                                    "icons": false },
+                        "core": { "initially_open": current_nodes }
+                    });
+            [% END %]
+        });
+    </script>
+[% END %]

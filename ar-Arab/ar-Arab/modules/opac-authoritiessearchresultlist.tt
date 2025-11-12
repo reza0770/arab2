@@ -1,0 +1,122 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'opac-authorities.inc' %]
+[% PROCESS 'authorities-search-results.inc' %]
+[% BLOCK pagination %]
+ <nav aria-label="ترقيم صفحات نتائج البحث" class="pagination pagination-sm noprint">
+ <ul class="pagination">
+ [% IF ( displayprev ) %]
+ <li class="page-item">
+ <a aria-label="اذهب إلى الصفحة السابقة" class="page-link" href="opac-authorities-home.pl?startfrom=[% startfromprev | uri %]&[% FOREACH searchdat IN searchdata %][% searchdat.term | uri %]=[% searchdat.val |url %]&[% END %]resultsperpage=[% resultsperpage | uri %]&type=opac&op=do_search&authtypecode=[% authtypecode | uri %]&orderby=[% orderby | uri %]">
+ <i class="fa fa-fw fa-angle-left" aria-hidden="true"></i> السابق</a>
+ </li>
+ [% END %]
+ [% FOREACH number IN numbers %]
+ [% IF ( number.highlight ) %]
+ <li class="page-item disabled">
+ <a aria-disabled="true" aria-label="الصفحة الحالية: صفحة [% number.number | html %]" class="page-link" href="#">[% number.number | html %]</a>
+ </li>
+ [% ELSE %]
+ <li class="page-item">
+ <a aria-label="اذهب إلى صفحة [% number.number | html %]" class="page-link" href="opac-authorities-home.pl?startfrom=[% number.startfrom | uri %]&[% FOREACH searchdat IN number.searchdata %][% searchdat.term | uri %]=[% searchdat.val |url %]&[% END %]resultsperpage=[% resultsperpage | uri %]&type=opac&op=do_search&authtypecode=[% authtypecode | uri %]&orderby=[% orderby | uri %]">[% number.number | html %]</a>
+ </li>
+ [% END %]
+ [% END %]
+ [% IF ( displaynext ) %]
+ <li class="page-item">
+ <a aria-label="اذهب إلى الصفحة الرئيسية" class="page-link" href="opac-authorities-home.pl?startfrom=[% startfromnext | uri %]&[% FOREACH searchdat IN searchdata %][% searchdat.term | uri %]=[% searchdat.val |url %]&[% END %]&resultsperpage=[% resultsperpage | uri %]&type=opac&op=do_search&authtypecode=[% authtypecode | uri %]&orderby=[% orderby | uri %]">
+ التالي<i class="fa fa-fw fa-angle-double-right" aria-hidden="true"></i>
+ </a>
+ </li>
+ [% END %]
+ </ul>
+ </nav> <!-- / #pages -->
+[% END %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>[% IF ( total ) %]Authority search result[% ELSE %]No results found[% END %] &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-authoritiesresultlist' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-authorities-home.pl">بحث الاستناد</a>
+ </li>
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">نتائج</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-lg-10 order-first order-md-first order-lg-2">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+ <div id="userauthsearchresults" class="maincontent">
+ <h1>نتائج البحث في الملفات الإستنادية</h1>
+
+ [% IF total %]
+ <div class="pages">[% pagination_bar | $raw %]</div>
+ [% END %]
+ <div id="results">
+ [% IF ( total ) %]
+ [% IF ( countfuzzy ) %]
+ <p><strong>عرض [% resultcount | html %] حول [% total | html %] نتائج</strong></p>
+ [% ELSE %]
+ <p><strong>النتائج [% from | html %] إلى [% to | html %] من [% total | html %]</strong></p>
+ [% END %] [% ELSE %] لم يتم العثور على نتائج. [% END %]</div>
+
+ [% IF ( total ) %]
+ <div class="searchresults">
+ <table class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th colspan="2">رؤوس الاستناد</th>
+ <th>نوع الرأس</th>
+ [% UNLESS ( isEDITORS ) %]
+ <th>التسجيلات البيبلوغرافية</th>
+ [% END %]
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH resul IN result %]
+ <tr>
+ <td>[% PROCESS authresult summary=resul.summary %]</td>
+ <td><a href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% resul.authid | uri %]">التفاصيل</a>
+ <td>[% resul.authtype | html %]</td>
+ [% UNLESS ( resul.isEDITORS ) %]
+ <td>
+ [% IF resul.used > 0 %]<a href="/cgi-bin/koha/opac-search.pl?type=opac&amp;op=do_search&amp;q=an=[% resul.authid | uri %]">[% resul.used | html %] التسجيلات الببليوغرافية</a>[% ELSE %] التسجيلات الببليوغرافية 0 [% END %]</td>
+ [% END %]
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div> <!-- / .searchresults -->
+
+ <div class="pages">[% pagination_bar | $raw %]</div>
+
+ [% END # / IF total %]
+ </div> <!-- / #userauthsearchresults -->
+ </div> <!-- / .col-lg-10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

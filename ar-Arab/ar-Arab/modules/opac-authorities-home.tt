@@ -1,0 +1,96 @@
+[% USE Koha %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Authority search &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-authorities' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">بحث الاستناد</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+ <div id="userauthhome" class="maincontent">
+ <form name="f" action="/cgi-bin/koha/opac-authorities-home.pl" method="get">
+ <input type="hidden" name="op" value="do_search" />
+ <input type="hidden" name="type" value="opac" />
+ <fieldset class="rows">
+ <legend><h1>بحث الاستناد</h1></legend>
+ <ol>
+ <li>
+ <label for="authtypecode">أنوع الاستناد:</label>
+ <select name="authtypecode" id="authtypecode">
+ [% FOREACH authority_type IN authority_types %]
+ [% IF authority_type.authtypecode == authtypecode %]
+ <option value="[% authority_type.authtypecode | html %]" selected="selected">[% authority_type.authtypetext | html %]</option>
+ [% ELSE %]
+ <option value="[% authority_type.authtypecode | html %]">[% authority_type.authtypetext | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li>
+ <label for="anywhere">خيارات البحث</label>
+ <select name="operator" id="anywhere">
+ <option value="contains">يحتوى</option>
+ <option value="start">يبدأ بـ</option>
+ <option value="exact">بالضبط</option>
+ </select>
+ </li>
+ <li>
+ <label for="value">مصطلحات:</label>
+ <input type="text" name="value" id="value" value="[% value | html %]" />
+ </li>
+ <li>
+ <label for="marclist">حيث:</label>
+ <select name="marclist" id="marclist">
+ <option value="all" selected="selected">في التسجيلة الكاملة</option>
+ <option value="match">في أي عنوان</option>
+ <option value="mainentry">في المدخل الرئيسي</option>
+ </select>
+ </li>
+ <li>
+ <input type="hidden" name="and_or" value="and" />
+ <input type="hidden" name="excluding" value="" />
+ <label for="orderby">طلبية بواسطة:</label>
+ <select name="orderby" id="orderby">
+ <option value="">لا شيئ</option>
+ <option value="HeadingAsc" selected="selected">العنوان تصاعدي</option>
+ <option value="HeadingDsc">العنوان تصاعدي</option>
+ </select>
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="إرسال" />
+ </fieldset>
+ </form>
+ </div> <!-- / #userauthhome -->
+ </div> <!-- / .col-lg-10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

@@ -1,0 +1,70 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Comments on [% INCLUDE 'biblio-title-head.inc' %] &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='comment' bodyclass='popup' %]
+ <div class="main">
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <div id="userreview" class="maincontent">
+ <h1>مراجعات</h1>
+ [% IF ( cgi_debug ) %]
+ <div class="debug">مصحح سي جي أي (CGI) مفعّل.</div>
+ [% END %]
+ [% IF ( ERRORS ) %]
+ <div class="alert alert-warning">
+ [% FOREACH ERROR IN ERRORS %]
+ [% IF ( ERROR.nobiblio ) %]
+ <p>خطأ: لا يمكننا ايجاد هذه التسجيلة الببلوغرافية.</p>
+ [% END %]
+ [% IF ( ERROR.unauthorized ) %]
+ <p>عذرا، فقط صاحب هذا التعليق يمكنه تعديله.</p>
+ [% END %]
+ [% IF ( ERROR.scrubbed ) %]
+ <p>ملاحظة: يحتوي تعليقك على رمز محظور. وتم حفظه وحذف العلامة المحظورة، كما هو موضح أدناه. يمكنك تحرير التعليق، أو إلغائه لاستعادة التعليق كما هو.</p>
+ [% END %]
+
+ [% IF ( ERROR.scrubbed_all ) %]
+ <p>خطأ! تعليقك بالكامل محظور. لم تتم إضافته.</p>
+ [% END %]
+
+ [% IF ( ERROR.empty ) %]
+ <p>خطأ! لا يمكن إضافة أي تعليق خالي. يرجى إضافة محتوى أو الإلغاء.</p>
+ [% END %] [% END # / FOREACH ERROR %] [% IF ( WINDOW_CLOSE ) %] ملاحظة: هذه النافذة ستغلق تلقائيا في غضون 5 ثوان[% END %]</div>
+ [% END # / ERRORs %]
+
+ <h2>التعليق على <em>[% INCLUDE 'biblio-title.inc' %]</em></h2>
+ [% IF ( biblio.author ) %]<h3>[% biblio.author | html %]</h3>[% END %]
+ <form id="reviewf" action="/cgi-bin/koha/opac-review.pl[% IF ( cgi_debug ) %]?debug=1[% END %]" method="post">
+ <input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />
+ [% IF ( reviewid ) %]<input type="hidden" name="reviewid" value="[% reviewid | html %]" />[% END %]
+ <fieldset>
+ <textarea id="review" name="review" cols="60" rows="8">[% review | html %]</textarea>
+ </fieldset>
+ <p>ملاحظة: يجب أن تتم الموافقة على تعليقك من قبل أمين المكتبة. </p>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="أرسل و أغلق هذه النافذة" />
+ <a class="cancel close" href="#">إلغاء</a>
+ </fieldset>
+ </form>
+ </div> <!-- / #usersendshelfform -->
+ </div> <!-- / .span12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' is_popup=1 %]
+[% BLOCK jsinclude %]
+<script>
+
+         $(document).ready(function() {
+            [% IF WINDOW_CLOSE %]
+                opener.location.reload();
+                window.close();
+            [% END %]
+        });
+
+</script>
+[% END %]

@@ -1,0 +1,56 @@
+[% USE raw %]
+[% USE Koha %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>
+ [% IF RestrictedPageTitle %]
+ [% RestrictedPageTitle | html %] &rsaquo;
+ [% END %]
+ [% IF ( LibraryNameTitle ) %]
+ [% LibraryNameTitle | html %]
+ [% ELSE %]
+ Koha online
+ [% END %]
+ catalog
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+<body id="opac-account" class="scrollto">
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ [% IF Koha.Preference('RestrictedPageTitle') %]
+ <li class="breadcrumb-item active" aria-current="page">
+ [% Koha.Preference('RestrictedPageTitle') | html %]
+ </li>
+ [% END %]
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ <div id="restrictedcontent" class="maincontent">
+ [% IF Koha.Preference('RestrictedPageTitle') %]
+ <h1>[% Koha.Preference('RestrictedPageTitle') | html %]</h1>
+ [% END %]
+ [% Koha.Preference('RestrictedPageContent') | $raw %]
+ </div>
+ </div> <!-- / .col-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+</div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

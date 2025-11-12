@@ -1,0 +1,60 @@
+
+<div class="row row-nav">
+    <div class="topnav" id="myTopnav">
+        
+            <a href="/cgi-bin/koha/opac-search.pl">بحث متقدم</a>
+        
+            <a href="/cgi-bin/koha/opac-search.pl">جستجوي بيشترفته</a>
+        
+            <a href="/cgi-bin/koha/opac-search.pl">فهرست كتاب خانه</a>
+        
+        
+            <a href="/cgi-bin/koha/opac-search.pl">درباره بايكاه</a>
+        <!-- khakdaman -->
+        [% IF ( Koha.Preference( 'UseCourseReserves' ) == 1 ) %]
+        
+        <a href="/cgi-bin/koha/opac-course-reserves.pl">الحجز الأكاديمي</a>
+        [% END %]
+        [% IF Koha.Preference( 'OpacBrowser' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-browser.pl">تصفح هرمي</a>
+        [% END %]
+        [% IF Koha.Preference( 'OpacAuthorities' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-authorities-home.pl">بحث الاستناد</a>
+        [% END %]
+        [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'OPACComments' ) == 1 ) && ( Koha.Preference( 'OpacShowRecentComments' ) == 1 ) ) %]
+        
+        <a href="/cgi-bin/koha/opac-showreviews.pl">التعليقات الأخيرة</a>
+        [% END %]
+        [% IF Koha.Preference( 'TagsEnabled' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-tags.pl">سحابة الوسوم</a>
+        [% END %]
+        [% IF Koha.Preference( 'OpacCloud' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-tags_subject.pl">سحابة الموضوع</a>
+        [% END %]
+        [% IF Koha.Preference( 'OpacTopissue' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-topissues.pl">الأكثر شعبية</a>
+        [% END %]
+        [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' && Koha.Preference( 'OpacBrowseSearch' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-browse.pl">استعراض البحث</a>
+        [% END %]
+        [% IF Koha.Preference( 'suggestion' ) == 1 %]
+        [% IF Koha.Preference( 'AnonSuggestions' ) == 1 || Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
+        
+        <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1">مقترحات الشراء</a>
+        [% END %]
+        [% END %]
+        
+        <a id="library_page" href="/cgi-bin/koha/opac-library.pl">
+        [% IF ( singleBranchMode ) %] مكتبة [% ELSE %] مكتبات [% END %] </a>
+    [% Koha.Preference('OpacMoreSearches') | $raw %]
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
+</div>

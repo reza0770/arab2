@@ -1,0 +1,6 @@
+[%# This template is called only for a very simple error message %]
+<html>
+<body id="opac-retrieve-file" class="scrollto">
+ <h1>Search unsuccessful</h1>
+ بحثك [% IF hash %] عن [% hash | html %][% END %] لم يكن ناجحا.</body>
+</html>

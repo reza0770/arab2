@@ -1,0 +1,534 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE AuthorisedValues %]
+[% USE KohaDates %]
+[% USE KohaNews %]
+[% SET opacsuggestion = KohaNews.get( location => "OpacSuggestioninstructions", lang => lang, library => branchcode ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>[% IF ( op_add ) %]Enter a new purchase suggestion[% END %]
+[% IF ( op_else ) %]Purchase Suggestions[% END %] &rsaquo;
+[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% IF ( loggedinusername ) %][% INCLUDE 'bodytag.inc' bodyid='opac-usersuggestions' bodyclass='scrollto' %][% ELSE %][% INCLUDE 'bodytag.inc' bodyid='opac-suggestions' bodyclass='scrollto' %][% END %]
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ </li>
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">مقترحات الشراء الخاصة بك</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
+ </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+
+ <div id="usersuggestions" class="maincontent">
+ [% IF ( op_add ) %]
+ <h1>مقترحات الشراء الخاصة بك</h1>
+ [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
+ <h2 class="TooManySuggestions">لا يمكك تقديم مزيد من المقترحات</h2>
+ <p class="TooManySuggestionsText">يمكنك إضافة حتى [% Koha.Preference('MaxTotalSuggestions') | html %] مقترحاً في [% Koha.Preference('NumberOfSuggestionDays') | html %] يوماً.</p>
+ [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
+ <h2 class="TooManySuggestions">لا يمكك تقديم مزيد من المقترحات</h2>
+ <p class="TooManySuggestionsText">لقد وصلت إلى الحد الأقصى للمقترحات التي يمكنك تقديمها في الوقت الحالي ([% Koha.Preference('MaxOpenSuggestions') | html %]). بمجرد قيام المكتية بمعالجة تلك المقترحات ستتمكن من تقديم المزيد.</p>
+ [% ELSE %]
+
+ [% IF ( opacsuggestion ) %]
+ [% PROCESS koha_news_block news => opacsuggestion %]
+ [% ELSE %]
+ <h2>إدخال مقترحات شراء جديدة</h2>
+
+ <p>رجاءاً قم بملء هذا النموذج لعمل مقترح شراء.وستتلقى رسالة عبر البريد الالكتروني عندما تقوم المكتبة بمعالجة مقترحك.</p>
+ <p>فقط  حقول معينة (معلمة بالأخمر) هي المطلوبة، ولكن إدخالك المزيد من المعلومات سيكون أسهل على أمناء المكتبات للبحث عن طلبك. حقل "الملاحظات" بإمكانك أن تستخدمه لتضع معلومات إضافية.</p>
+ [% END %]
+ [% FOR m IN messages %]
+ <div class="alert alert-[% m.type | html %]">
+ [% SWITCH m.code %] [% CASE 'biblio_exists' %] توجد وثيقة مشابهة بالفعل:<a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]">[% m.title | html %]</a>. قم بالنقر على "تأكيد مقترحك" لتجاهل هذه الرسالة. [% CASE %] [% m.code | html %] [% END %]</div>
+ [% END %]
+
+ <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="add_suggestion_form">
+ <fieldset class="rows">
+ <ol>
+ <li>
+ [% IF ( title_required ) %]
+ <label for="title" class="required">العنوان:</label>
+ <input type="text" id="title" name="title" class="span6" maxlength="255" value="[% title | html %]" required="required" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="title">العنوان:</label>
+ <input type="text" id="title" name="title" class="span6" maxlength="255" value="[% title | html %]" />
+ [% END %]
+ </li>
+ [% UNLESS ( author_hidden ) %]
+ <li>
+ [% IF ( author_required ) %]
+ <label for="author" class="required">المؤلف:</label>
+ <input type="text" id="author" name="author" class="span6" maxlength="80" value="[% author | html %]" required="required" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="author">المؤلف:</label>
+ <input type="text" id="author" name="author" class="span6" maxlength="80" value="[% author | html %]" />
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( copyrightdate_hidden )%]
+ <li>
+ <div title="حقول النسخ او سنة النشر، مثلا، 2016">
+ [% IF ( copyrightdate_required ) %]
+ <label for="copyrightdate" class="required">تارخ حق النشر:</label>
+ <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="4" maxlength="4" value="[% copyrightdate | html %]" required="required" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="copyrightdate">تارخ حق النشر:</label>
+ <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="4" maxlength="4" value="[% copyrightdate | html %]" />
+ [% END %]
+ </div>
+ </li>
+ [% END %]
+ [% UNLESS ( isbn_hidden )%]
+ <li>
+ [% IF ( isbn_required ) %]
+ <label for="isbn" class="required">الرقم المعياري (ردمك، ردمد أو آخر) :</label>
+ <input type="text" id="isbn" name="isbn"  maxlength="80" value="[% isbn | html %]" required="required" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="isbn">الرقم المعياري (ردمك، ردمد أو آخر) :</label>
+ <input type="text" id="isbn" name="isbn"  maxlength="80" value="[% isbn | html %]" />
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( publishercode_hidden ) %]
+ <li>
+ [% IF ( publishercode_required ) %]
+ <label for="publishercode" class="required">الناشر:</label>
+ <input type="text" id="publishercode" name="publishercode" class="span6" maxlength="80" value="[% publishercode | html %]" required="required" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="publishercode">الناشر:</label>
+ <input type="text" id="publishercode" name="publishercode" class="span6" maxlength="80" value="[% publishercode | html %]" />
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( collectiontitle_hidden ) %]
+ <li>
+ [% IF ( collectiontitle_required ) %]
+ <label for="collectiontitle" class="required">عنوان المجموعة:</label>
+ <input type="text" id="collectiontitle" name="collectiontitle" class="span6" maxlength="80" value="[% collectiontitle | html %]" required="required" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="collectiontitle">عنوان المجموعة:</label>
+ <input type="text" id="collectiontitle" name="collectiontitle" class="span6" maxlength="80" value="[% collectiontitle | html %]" />
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( place_hidden ) %]
+ <li>
+ [% IF ( place_required ) %]
+ <label for="place" class="required">مكان النشر:</label>
+ <input type="text" id="place" name="place" required="required" maxlength="80" value="[% place | html %]" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="place">مكان النشر:</label>
+ <input type="text" id="place" name="place"  maxlength="80" value="[% place | html %]" />
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( quantity_hidden ) %]
+ <li id="opac-suggestion-quantity">
+ [% IF ( quantity_required ) %]
+ <label for="quantity" class="required">الكمية:</label>
+ <input type="text" id="quantity" name="quantity" required="required" maxlength="4" size="4" />
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="quantity">الكمية:</label>
+ <input type="text" id="quantity" name="quantity"  maxlength="4" size="4" />
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( itemtype_hidden )%]
+ <li>
+ [% IF ( itemtype_required ) %]
+ <label for="itemtype" class="required">نوع المادة:</label>
+ [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size = 20, required = 1, blank = 1 %]
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="itemtype">نوع المادة:</label>
+ [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size = 20, blank = 1 %]
+ [% END %]
+ </li>
+ [% END %]
+ [% UNLESS ( branch_hidden )%]
+ <li>
+ [% IF ( branchcode_required ) %]
+ <label for="branch" class="required">المكتبة:</label>
+ <select name="branchcode" id="branch" required="required">
+ [% PROCESS options_for_libraries libraries => Branches.all( selected => branchcode ) %]
+ </select>
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="branch">المكتبة:</label>
+ <select name="branchcode" id="branch">
+ [% PROCESS options_for_libraries libraries => Branches.all( selected => branchcode ) %]
+ </select>
+ [% END %]
+ </li>
+ [% END %]
+ [% IF ( patron_reason_loop ) %]
+ [% UNLESS ( patronreason_hidden )%]
+ <li>
+ [% IF ( patronreason_required ) %]
+ <label for="patronreason" class="required">سبب الاقتراح:</label>
+ <select name="patronreason" id="patronreason" required="required">
+ <option value="">-- إختيار --</option>
+ [% FOREACH patron_reason_loo IN patron_reason_loop %]
+ <option value="[% patron_reason_loo.authorised_value | html %]">[% patron_reason_loo.lib | html %]</option>
+ [% END %]
+ </select>
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="patronreason">سبب الاقتراح:</label>
+ <select name="patronreason" id="patronreason">
+ <option value="">-- إختيار --</option>
+ [% FOREACH patron_reason_loo IN patron_reason_loop %]
+ <option value="[% patron_reason_loo.authorised_value | html %]">[% patron_reason_loo.lib | html %]</option>
+ [% END %]
+ </select>
+ [% END %]
+ </li>
+ [% END %]
+ [% END %]
+ [% UNLESS ( note_hidden ) %]
+ <li>
+ [% IF ( note_required ) %]
+ <label for="note" class="required">ملاحظات:</label>
+ <textarea name="note" id="note" rows="5" cols="40" required="required">[% note | html %]</textarea>
+ <span class="required">مطلوب</span>
+ [% ELSE %]
+ <label for="note">ملاحظات:</label>
+ <textarea name="note" id="note" rows="5" cols="40">[% note | html %]</textarea>
+ [% END %]
+ </li>
+ [% END %]
+
+ <!-- Add a hidden 'negcap' field -->
+ <li id="negcap" style="position: absolute; left: -2000px;">
+ negcap <input type="text" name="negcap"/>
+ </li>
+
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input type="hidden" name="suggested_by_anyone" value="[% suggested_by_anyone | html %]" />
+ [% IF need_confirm # Confirm that we want a duplicate %]
+ <input type="hidden" name="op" value="add_confirm" />
+ <input class="btn btn-primary" type="submit" value="تأكيد مقترحك" />
+ [% ELSIF biblionumber # Create from an existing title %]
+ <input type="hidden" name="op" value="add_confirm" />
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ <input class="btn btn-primary" type="submit" value="تقديم مقترحك" />
+ [% ELSE # Not created from an existing title, search for possible duplicate %]
+ <input type="hidden" name="op" value="add_validate" />
+ <input class="btn btn-primary" type="submit" value="تقديم مقترحك" />
+ [% END %]
+ <a class="action" href="/cgi-bin/koha/opac-suggestions.pl">إلغاء</a>
+ </fieldset>
+ </form>
+ [% END %]
+ [% END #  IF op_add %]
+
+ [% IF ( op_else ) %]
+ <h1>
+ [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %] مقترحات الشراء [% ELSE %] [% IF ( loggedinusername ) %] مقترحات شرائك [% ELSE %] مقترحات الشراء[% END %] [% END %] </h1>
+ [% FOR m IN messages %]
+ <div class="alert alert-[% m.type | html %]">
+ [% SWITCH m.code %] [% CASE 'total_suggestions' %] لم تتم إضافة المقترح. لقد وصلت الى الحد الأقصى من المقترحات التي يمكن تقديمها في الوقت الحالي ([% Koha.Preference('MaxTotalSuggestions') | html %] في [% Koha.Preference('NumberOfSuggestionDays') | html %] يوم). [% CASE 'too_many' %] لم تتم إضافة المقترح. لقد وصلت الى الحد الأقصى من المقترحات التي يمكن تقديمها في الوقت الحالي ([% Koha.Preference('MaxOpenSuggestions') | html %]). حالما تقوم المكتبة بمعالجة تلك الاقتراحات ستصبح قادراً على تقديم المزيد. [% CASE 'already_exists' %] تمت إضافة المقترح. يوجد مقترح بهذا العنوان بالفعل. [% CASE 'success_on_inserted' %] تم تقديم مقترحك. [% CASE %] [% m.code | html %] [% END %]</div>
+ [% END %]
+
+ [% IF ( deleted ) %]<div class="alert alert-info">تم حذف المقترحات المحددة.</div>[% END %]
+
+ [% IF suggestions_loop OR title_filter %]
+ <form action="/cgi-bin/koha/opac-suggestions.pl" class="form-inline" id="search_suggestions_form" method="get">
+ <div class="form-row">
+ <label for="title_filter">البحث عن:</label>
+ <input type="text" name="title_filter" id="title_filter" value="[% title_filter | html %]" />
+ [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
+ [% IF loggedinusername %]
+ <div class="col-auto my-1">
+ <label class="sr-only" for="suggested_by_anyone">مقترح من قبل:</label>
+ <select class="form-control form-control-sm" name="suggested_by_anyone" id="suggested_by_anyone">
+ [% IF suggested_by_anyone %]
+ <option value="0">مقترح بواسطتي</option>
+ <option value="1" selected="selected">مقترح بواسطة أي شخص</option>
+ [% ELSE %]
+ <option value="0" selected="selected">مقترح بواسطتي</option>
+ <option value="1">مقترح بواسطة أي شخص</option>
+ [% END %]
+ </select>
+ </div>
+ [% END %]
+ [% END %]
+ <div class="col-auto my-1">
+ <button type="submit" class="btn btn-sm btn-primary">اذهب</button>
+ </div>
+ </div>
+ </form>
+ [% END %]
+ [% IF suggestions_loop %]
+ [% SET can_delete_suggestion = 0 %]
+ <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="delete_suggestions">
+ <input type="hidden" name="op" value="delete_confirm" />
+ [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
+ <div id="toolbar" class="toolbar clearfix">
+ [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
+ <p class="TooManySuggestionsText">يمكنك إضافة حتى [% Koha.Preference('MaxTotalSuggestions') | html %] مقترحاً في [% Koha.Preference('NumberOfSuggestionDays') | html %] يوماً.</p>
+ [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
+ <p class="TooManySuggestionsText">لقد وصلت إلى الحد الأقصى للمقترحات التي يمكنك تقديمها في الوقت الحالي ([% Koha.Preference('MaxOpenSuggestions') | html %]).</br>حال أن تعالج المكتبة تلك المتقرحات يمكنك عندها تقديم المزيد.</p>
+ [% ELSE %]
+ <a class="btn btn-link new" href="/cgi-bin/koha/opac-suggestions.pl?op=add"><i class="fa fa-plus"  aria-hidden="true"></i> مقترحات للشراء جديدة</a>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF ( loggedinusername ) %]
+ <div class="selections-toolbar toolbar">
+ <div class="check_control">
+ <span class="checkall"></span> <span class="clearall"></span>
+ </div>
+ <div class="links">
+ <span class="selections">تحديد الاقتراحات لـ: </span>
+ <span id="removeitems">
+ <a href="#" class="btn btn-link removeitems tag_hides disabled"><i class="fa fa-trash" aria-hidden="true"></i> حذف</a>
+ </span>
+ </div>
+ </div>
+ [% END %]
+
+ <table id="suggestt" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ [% IF ( loggedinusername ) %]<th>&nbsp;</th>[% END %]
+ <th>ملخص</th>
+ <th>مقترح لـِ</th>
+ <th>ملاحظة</th>
+ [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]<th>مقترح لـِ</th>[% END %]
+ [% IF Koha.Preference( 'OpacSuggestionManagedBy' ) %]<th>مدار بواسطة</th>[% END %]
+ <th>حالة</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH suggestions_loo IN suggestions_loop %]
+ <tr>
+ [% IF ( loggedinusername ) %]
+ <td class="selectcol">
+ [% IF ( suggestions_loo.showcheckbox ) %]
+ [% SET can_delete_suggestion = 1 %]
+ <input type="checkbox" class="cb" id="id[% suggestions_loo.suggestionid | html %]" name="delete_field" data-title="[% suggestions_loo.title | html %]" value="[% suggestions_loo.suggestionid | html %]" />
+ [% END %]
+ </td>
+ [% END %]
+ <td>
+ <p>
+ <label for="id[% suggestions_loo.suggestionid | html %]">
+ [% IF suggestions_loo.biblionumber %]
+ <strong><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% suggestions_loo.biblionumber | uri %]">[% suggestions_loo.title | html %]</a></strong>
+ [% ELSE %]
+ <strong>[% suggestions_loo.title | html %]</strong>
+ [% END %]
+ </label>
+ </p>
+ <p>[% IF ( suggestions_loo.author ) %][% suggestions_loo.author | html %],[% END %]
+ [% IF ( suggestions_loo.copyrightdate ) %] - [% suggestions_loo.copyrightdate | html %],[% END %]
+ [% IF ( suggestions_loo.publishercode ) %] - [% suggestions_loo.publishercode | html %][% END %]
+ [% IF ( suggestions_loo.place ) %]([% suggestions_loo.place | html %])[% END %]
+ [% IF ( suggestions_loo.collectiontitle ) %] , [% suggestions_loo.collectiontitle | html %][% END %]
+ [% IF ( suggestions_loo.itemtype ) %] - [% AuthorisedValues.GetByCode( 'SUGGEST_FORMAT', suggestions_loo.itemtype, 1 ) | html %][% END %]
+ </p>
+ </td>
+ <td>
+ [% IF ( suggestions_loo.suggesteddate ) %][% suggestions_loo.suggesteddate |$KohaDates %][% END %]
+ </td>
+ <td>
+ [% IF ( suggestions_loo.note ) %]
+ <span class="tdlabel">ملاحظة: </span>
+ [% suggestions_loo.note | html %]
+ [% END %]
+ </td>
+ [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
+ <td>
+ [% IF ( suggestions_loo.branchcodesuggestedby ) %]
+ <span class="tdlabel">مقترح لـِ:</span>
+ [% suggestions_loo.branchcodesuggestedby | html %]
+ [% END %]
+ </td>
+ [% END %]
+ [% IF Koha.Preference( 'OpacSuggestionManagedBy' ) %]
+ <td>
+ [% IF ( suggestions_loo.surnamemanagedby ) %]
+ <span class="tdlabel">مدار بواسطة:</span>
+ [% suggestions_loo.surnamemanagedby | html %]
+ [% IF ( suggestions_loo.firstnamemanagedby ) %] , [% suggestions_loo.firstnamemanagedby | html %]
+ [% END %]
+ [% END %]
+ </td>
+ [% END %]
+ <td>
+ <span class="tdlabel">حالة:</span>
+ [% IF ( suggestions_loo.ASKED ) %]مطلوب [% ELSIF ( suggestions_loo.CHECKED ) %]معار بواسطة المكتبة [% ELSIF ( suggestions_loo.ACCEPTED ) %] مقبول بواسطة المكتبة [% ELSIF ( suggestions_loo.ORDERED ) %] مطلوب بواسطة المكتبة[% ELSIF ( suggestions_loo.REJECTED ) %] تم رفض المقترح [% ELSIF ( suggestions_loo.AVAILABLE ) %] متاح في المكتبة [% ELSE %] [% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestions_loo.STATUS, 1 ) | html %] [% END %] [% IF ( suggestions_loo.reason ) %]([% suggestions_loo.reason | html %])[% END %] </td>
+ </tr>
+ [% END # / FOREACH suggestions_loo %]
+ </tbody>
+ </table>
+
+ [% IF ( loggedinusername && can_delete_suggestion ) %]
+ <fieldset class="action">
+ <input class="btn btn-danger removeitems" type="submit" value="حذف المحدد" />
+ </fieldset>
+ [% END %]
+ </form>
+ [% ELSE %]
+ [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) %]
+ [% IF title_filter %]
+ <p>There are no pending purchase suggestions matching your search.</p>
+ [% ELSIF loggedinusername AND NOT suggested_by_anyone %]
+ <p>لا توجد لديك مقترحات شراء في الانتظار.<a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1">عرض كل المقترحات</a></p>
+ [% ELSE %]
+ <p>لا توجد اقتراحات شراء معلّقة.</p>
+ [% END %]
+ [% ELSE %]
+ [% IF ( loggedinusername ) %]
+ [% IF title_filter %]
+ <p>There are no pending purchase suggestions matching your search.</p>
+ [% ELSE %]
+ <p>لا توجد لديك مقترحات شراء في الانتظار.</p>
+ [% END %]
+ [% ELSE %]
+ <p>لا يوجد لديك صلاحية لرؤية مقترحات الشراء المعلقة</p>
+ [% END %]
+ [% END %]
+ [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
+ [% IF ( Koha.Preference('MaxTotalSuggestions') != ''  && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
+ <p class="TooManySuggestionsText">يمكنك إضافة حتى [% Koha.Preference('MaxTotalSuggestions') | html %] مقترحاً في [% Koha.Preference('NumberOfSuggestionDays') | html %] يوماً.</p>
+ [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != ''  && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
+ <p class="TooManySuggestionsText">لقد وصلت إلى الحد الأقصى للمقترحات التي يمكنك تقديمها في الوقت الحالي.</br>حال أن تعالج المكتبة تلك المتقرحات يمكنك عندها تقديم المزيد.</p>
+ [% ELSE %]
+ <p><a class="btn btn-link new" href="/cgi-bin/koha/opac-suggestions.pl?op=add"><i class="fa fa-plus" aria-hidden="true"></i> مقترحات للشراء جديدة</a></p>
+ [% END %]
+ [% END %]
+ [% END # / IF suggestions_loop %]
+
+ [% END # IF op_else %]
+ </div> <!-- / #usersuggestions -->
+ </div> <!-- / .col-lg-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% INCLUDE 'datatables.inc' %]
+<script>
+    [% IF ( loggedinusername ) %]
+        function enableCheckboxActions(){
+            // Enable/disable controls if checkboxes are checked
+            var checkedBoxes = $(".cb:checked");
+            if ($(checkedBoxes).size()) {
+              $(".selections").html(_("مع المقترحات المحددة: "));
+              $(".selections-toolbar .links a").removeClass("disabled");
+            } else {
+              $(".selections").html(_("تحديد الاقتراحات لـ: "));
+              $(".selections-toolbar .links a").addClass("disabled");
+            }
+        }
+    [% END %]
+
+    $(function() {
+        $("#suggestt").dataTable($.extend(true, {}, dataTablesDefaults, {
+            "order": [[ 1, "asc" ]],
+            "autoWidth": false,
+            "columnDefs": [
+              [% IF ( loggedinusername ) %]{ "targets": [ 0 ], "sortable": false, "searchable": false }[% END %]
+            ],
+            "columns": [
+                [% IF ( loggedinusername ) %]null,[% END %]
+                { "type": "anti-the" },
+                null,
+                null,
+                [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]null,[% END %]
+                [% IF Koha.Preference( 'OpacSuggestionManagedBy' ) %]null,[% END %]
+                null
+            ]
+        }));
+        [% IF ( loggedinusername ) %]$("span.clearall").html("<a id=\"CheckNone\" class=\"btn btn-link btn-sm\" href=\"#\">"+_("مسح الكل")+"<\/a>");
+        $("span.checkall").html("<a id=\"CheckAll\" class=\"btn btn-link btn-sm\" href=\"#\">"+_("اختر الكل")+"<\/a>");
+        $("#CheckAll").on("click",function(e){
+            e.preventDefault();
+            $(".cb").prop("checked", true);
+            enableCheckboxActions();
+        });
+        $("#CheckNone").on("click",function(e){
+            e.preventDefault();
+            $(".cb").prop("checked", false);
+            enableCheckboxActions();
+        });
+        $(".cb").click(function(){
+          enableCheckboxActions();
+        });
+
+        enableCheckboxActions();
+
+        $(".removeitems").on("click", function(e) {
+            e.preventDefault();
+            var selected_titles = $("input:checked");
+            var title;
+            var yes_label;
+            var no_label;
+            var message = "";
+            if ( selected_titles.size() < 1 ) {
+                alert(MSG_NO_SUGGESTION_SELECTED);
+                return false;
+            } else {
+                if( selected_titles.size() > 1 ){
+                    message = $("<ul></ul>");
+                    title = _("هل أنت متأكد من أنك تريد حذف هذه المقترحات؟");
+                    yes_label = _("نعم، إحذف المقترحات");
+                    no_label = _("لا، لا تقم بحذف المقترحات");
+                    selected_titles.each(function(){
+                        message.append( "<li>" +  $(this).data("title") + "</li>" );
+                    });
+                } else {
+                    title = _("هل أنت متأكد من أنك تريد حذف هذا المقترح؟");
+                    yes_label = _("نعم، إحذف المقترح");
+                    no_label = _("لا، لا تقم بحذف المقترح");
+                    selected_titles.each(function(){
+                        message += $(this).data("title");
+                    });
+                }
+                confirmModal( message, title, yes_label, no_label, function( result ){
+                    if( result ){
+                        $("#delete_suggestions").submit();
+                    }
+                });
+            }
+        });
+        [% END %]
+    });
+</script>
+[% END %]

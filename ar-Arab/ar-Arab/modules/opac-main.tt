@@ -1,0 +1,1335 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE Categories %]
+[% USE ItemTypes %]
+[% USE Price %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% SET OpacNavRight = AdditionalContents.get( location => "OpacNavRight", lang => lang, library => branchcode ) %]
+[% SET OpacMainUserBlock = AdditionalContents.get( location => "OpacMainUserBlock", lang => lang, library => branchcode ) %]
+[% SET OpacLoginInstructions = AdditionalContents.get( location => "OpacLoginInstructions", lang => lang, library => branchcode )
+%]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]كوها على الخط المباشر[% END %] الفهرس</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+[% INCLUDE 'bodytag.inc' bodyid='opac-main' %]
+[% INCLUDE 'masthead.inc' bodyid='opac-main' %]
+
+
+
+
+
+
+<!-- khakdaman -->
+
+
+<style>
+    .topnav {
+        overflow: hidden;
+        background-color: #03588f;
+        display: flex;
+        justify-content: center;
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAwCAMAAADn7eCzAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2RpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDoxRDZGNzgyQUJBMkFFMzExQTVGNUFCRDU2OEZBRUZFNyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoxQjdGMDY5NjhGRjcxMUU0OEIyREIwQzAwOTQxNzMxMCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxQjVEQTI3MThGRjcxMUU0OEIyREIwQzAwOTQxNzMxMCIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IFdpbmRvd3MiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpENEUxRjg4RjMwOEZFNDExQUIxRkIwQjlDNTdGNDY4OSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxRDZGNzgyQUJBMkFFMzExQTVGNUFCRDU2OEZBRUZFNyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PtZ6eSMAAAB4UExURQAyTwAzUAA2VQA1UwA0UgE8XgJHbwAzUQJIcQE5WQE/YwJDaQFBZQE+YgFAZQFAZAFBZgE7XQE+YQA4VwE9YAJGbQA3VgJEagJFbAJIcAE4WAJEawE9XwE7XAJHbgA1VAA3VwFCZwA0UQJFbQE6WgE6WwFCaAE5Wi89I/YAAABJSURBVHjaLMFZAoEAFADAiSwRKbIUUcL9b9j7MGPtZqlTe7tqXWx99Q5ye4WNncrJ3SKWHj5GP5nG0cvZLD7NYxoHK0n8mwQYALE7AxwrPIzXAAAAAElFTkSuQmCC");
+        border-radius: 5px;
+        z-index: 1000;
+        margin: 0px auto;
+        line-height: 250%;
+        margin-bottom: -23px;
+    }
+
+    .topnav a {
+        float: right;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 0px 5px;
+        text-decoration: none;
+        font-size: 17px;
+    }
+
+    .topnav a:not(:first-child) {
+        background-color: initial;
+    }
+
+    .topnav a:hover {
+        background-color: #004f7d;
+    }
+
+    .topnav a.active {
+        background-color: #04AA6D;
+        color: white;
+    }
+
+    .topnav .icon {
+        display: none;
+    }
+
+    .topnav a:after {
+        /* content: " | "; */
+        /* khakdaman */
+        /* color: #ffffff; */
+    }
+
+    /* @media screen and (max-width: 916px) {
+        .item-nav-7 {
+            display: none !important;
+            background-color: #828586 !important;
+        }
+    }
+    @media screen and (max-width: 1052px) {
+        .item-nav-9 {
+            display: none !important;
+            background-color: #828586 !important;
+        }
+    } */
+
+    .item-nav-14::after {
+        content: "" !important;
+    }
+
+
+    @media screen and (max-width: 742px) {
+        /* .item-nav-14 ,.item-nav-11 {
+            display: none !important;
+            background-color: #828586 !important;
+        } */
+
+        .between-nav-item {
+            display: none !important;
+        }
+
+        .topnav a:not(:first-child) {
+            display: none;
+            background-color: #00324f;
+        }
+
+        .topnav a:not(:first-child):hover {
+            background-color: #004f7d;
+        }
+
+        .topnav a.icon {
+            float: left;
+            display: block;
+        }
+
+        .topnav a:after {
+            content: initial;
+        }
+
+        .topnav {
+            overflow: hidden;
+            background-color: #08090a;
+            display: inherit;
+            margin-bottom: -16px;
+            z-index: 1000;
+            position: relative;
+            /* height: 49px; */
+        }
+
+        .row-nav {
+            display: inherit;
+        }
+
+
+        .first-item-nav {
+            margin-top: 0px !important;
+            padding: 6px 20px !important;
+        }
+
+    }
+
+    .main #searchform {
+        margin-top: 15px;
+    }
+
+
+    @media screen and (max-width: 1005px) {
+        .topnav a {
+            font-size: 1.62vw;
+        }
+    }
+
+    @media screen and (max-width: 742px) {
+
+        .topnav.responsive {
+            position: relative;
+
+        }
+
+
+        .topnav.responsive .icon {
+            text-align: left;
+            position: absolute;
+            left: 0px;
+            top: -1px;
+        }
+
+        .topnav a {
+            margin-bottom: -6px;
+            padding: 0 20px;
+            font-size: 17px;
+        }
+
+        .topnav.responsive a {
+            float: none;
+            display: block;
+            text-align: right;
+            margin-top: -1px;
+            padding: 2px 20px;
+        }
+    }
+</style>
+
+<div class="row row-nav">
+    <div class="topnav" id="myTopnav">
+        <!-- khakdaman -->
+
+        <a href="/" class="first-item-nav">الصفحة الرئيسية</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+
+        <a href="/cgi-bin/koha/opac-search.pl" class="first-item-nav item-nav-2">فريق العمل</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+
+        <a href="/cgi-bin/koha/opac-search.pl " class="first-item-nav item-nav-3">البحث المتقدم</a>
+
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% IF Koha.Preference( 'OpacBrowser' ) == 1 %]
+
+        <a href="/cgi-bin/koha/opac-browser.pl" class="first-item-nav item-nav-6">تصفح هرمي</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% END %]
+        [% IF Koha.Preference( 'OpacAuthorities' ) == 1 %]
+
+        <a href="/cgi-bin/koha/opac-authorities-home.pl" class="first-item-nav item-nav-7">مكنز المواضيع</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% END %]
+        [% IF Koha.Preference( 'TagsEnabled' ) == 1 %]
+
+        <a href="/cgi-bin/koha/opac-tags.pl" class="first-item-nav item-nav-9">سحابة الوسوم</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% END %]
+
+        [% IF Koha.Preference( 'OpacCloud' ) == 1 %]
+
+        <a href="/cgi-bin/koha/opac-tags_subject.pl" class="first-item-nav item-nav-10">سحابة الموضوع</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% END %]
+
+        [% IF Koha.Preference( 'OpacTopissue' ) == 1 %]
+
+        <a href="/cgi-bin/koha/opac-topissues.pl" class="first-item-nav item-nav-11">الأكثر شعبية</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% END %]
+
+        [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' && Koha.Preference( 'OpacBrowseSearch' ) == 1 %]
+
+        <a href="/cgi-bin/koha/opac-browse.pl" class="first-item-nav item-nav-12">استعراض البحث</a>
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        [% END %]
+
+
+        <a id="library_page" href="/cgi-bin/koha/opac-library.pl" class="first-item-nav item-nav-14">
+            [% IF ( singleBranchMode ) %] مكتبة [% ELSE %] المكتبات المشاركة [% END %]
+        </a>
+
+
+        [% IF Koha.Preference( 'suggestion' ) == 1 %]
+        [% IF Koha.Preference( 'AnonSuggestions' ) == 1 || Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
+
+        <a class="first-item-nav between-nav-item" style="background-color: initial;">|</a>
+        <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1" class="first-item-nav item-nav-13">مقترحات
+            الشراء</a>
+        [% END %]
+        [% END %]
+
+        <!-- 
+            
+        [% IF ( Koha.Preference( 'UseCourseReserves' ) == 1 ) %]
+
+        <a href="/cgi-bin/koha/opac-course-reserves.pl" class="first-item-nav item-nav-5">الحجز الأكاديمي</a>
+        [% END %] -->
+        <!-- [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'OPACComments' ) == 1 ) && (Koha.Preference( 'OpacShowRecentComments' ) == 1 ) ) %]
+
+        <a href="/cgi-bin/koha/opac-showreviews.pl" class="first-item-nav item-nav-8">التعليقات الأخيرة</a>
+        [% END %] -->
+
+        [% Koha.Preference('OpacMoreSearches') | $raw %]
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()" style="background-color: revert;">
+            <i class="fa fa-bars mt-2" style="font-size: 35px;"></i>
+        </a>
+    </div>
+</div>
+
+
+
+
+<script>
+    function myFunction() {
+        var x = document.getElementById("myTopnav");
+        if (x.className === "topnav") {
+            x.className += " responsive";
+        } else {
+            x.className = "topnav";
+        }
+    }
+</script>
+
+<!-- edit -->
+<!-- <div class="row">
+    <ul class="nav" id="moresearches">
+        <li class="nav-item">
+            <a href="/cgi-bin/koha/opac-search.pl">بحث متقدم</a>
+        </li>
+        <li class="nav-item">
+            <a href="/cgi-bin/koha/opac-search.pl">جستجوي بيشترفته</a>
+        </li>
+        <li class="nav-item">
+            <a href="/cgi-bin/koha/opac-search.pl">فهرست كتاب خانه</a>
+        </li>
+        
+        <li class="nav-item">
+            <a href="/cgi-bin/koha/opac-search.pl">درباره بايكاه</a>
+        </li>
+        [% IF ( Koha.Preference( 'UseCourseReserves' ) == 1 ) %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-course-reserves.pl">الحجز الأكاديمي</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference( 'OpacBrowser' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-browser.pl">تصفح هرمي</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference( 'OpacAuthorities' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-authorities-home.pl">بحث الاستناد</a>
+        </li>
+        [% END %]
+        [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'OPACComments' ) == 1 ) && ( Koha.Preference( 'OpacShowRecentComments' ) == 1 ) ) %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-showreviews.pl">التعليقات الأخيرة</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference( 'TagsEnabled' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-tags.pl">سحابة الوسوم</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference( 'OpacCloud' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-tags_subject.pl">سحابة الموضوع</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference( 'OpacTopissue' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-topissues.pl">الأكثر شعبية</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' && Koha.Preference( 'OpacBrowseSearch' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-browse.pl">استعراض البحث</a>
+        </li>
+        [% END %]
+        [% IF Koha.Preference( 'suggestion' ) == 1 %]
+        [% IF Koha.Preference( 'AnonSuggestions' ) == 1 || Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
+        <li class="nav-item">
+        <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1">مقترحات الشراء</a>
+        </li>
+        [% END %]
+        [% END %]
+        <li class="nav-item">
+        <a id="library_page" href="/cgi-bin/koha/opac-library.pl">
+        [% IF ( singleBranchMode ) %] مكتبة [% ELSE %] مكتبات [% END %] </a>
+        </li>
+    [% Koha.Preference('OpacMoreSearches') | $raw %]
+    </ul>
+</div>  -->
+
+<!-- khakdaman -->
+
+<div class="main py-5">
+
+
+    <div id="opac-main-search">
+
+
+        <!-- khakdaman -->
+        <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform">
+
+            <!-- khakdaman -->
+
+            <div class="row">
+                <div id="searchtitle" style="margin: 0px auto;">
+                    <img src="/opac-tmpl/bootstrap/images/unionsearch.png" style="max-width: 100%;"
+                        alt="البحث الموحد في مصادر المكتبات العراقية" style="margin: 0px auto;display: block;"
+                        title="البحث الموحد في مصادر المكتبات العراقية">
+                </div>
+            </div>
+            <!-- khakdaman -->
+
+
+            <div class="col-sm-auto order-2 order-sm-2 idx_div" style='padding:0px;' id="filter_search_top">
+                <input id="rad1" type="radio" name="idx" value="" checked="checked" />
+                <label for="rad1">
+                    <span class="checkmark">
+
+                    </span>كافة الحقول</label>
+                <input id="rad2" type="radio" name="idx" value="ti" />
+                <label for="rad2">
+                    <span class="checkmark">
+
+                    </span> عنوان </label>
+                <input id="rad3" type="radio" name="idx" value="au" />
+                <label for="rad3">
+                    <span class="checkmark">
+
+                    </span> مؤلف </label>
+                <input id="rad4" type="radio" name="idx" value="su" />
+                <label for="rad4">
+                    <span class="checkmark">
+
+                    </span> موضوع </label>
+                <!-- khakdman -->
+                <!-- <input id="rad5" type="radio" name="idx" value="nb" /> -->
+                <!-- <label for="rad5">
+                    <span class="checkmark">
+
+                    </span> تدمك </label>
+                <input id="rad6" type="radio" name="idx" value="ns" />
+                <label for="rad6">
+                    <span class="checkmark">
+
+                    </span> السلاسل </label>
+                <input id="rad7" type="radio" name="idx" value="callnum,phr" />
+                <label for="rad7">
+                    <span class="checkmark">
+
+                    </span> رقم الطلب </label> -->
+                <!-- khakdman -->
+            </div>
+            <div class="form-row align-items-center" id="m">
+                <div class="col-sm-auto order-1 order-sm-1" style="display:none;">
+                    <label for="masthead_search">[% UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 )
+                        %] [% IF ( mylibraryfirst ) %] (في [% Branches.GetName( mylibraryfirst ) | html %] فقط) [% END
+                        %] [% END %]</label>
+                </div>
+
+                <div class="col-sm-auto order-2 order-sm-2" style="display:none">
+
+
+
+                    <select name="idx2" id="masthead_search" class="form-control">
+                        [% IF ( ms_kw ) %]
+                        <option selected="selected" value="">فهرس المكتبة</option>
+                        [% ELSE %]
+                        <option value="">فهرس المكتبة</option>
+                        [% END # /ms_kw %]
+                        [% IF ( ms_ti ) %]
+                        <option selected="selected" value="ti">عنوان</option>
+                        [% ELSE %]
+                        <option value="ti">عنوان</option>
+                        [% END # /ms_ti %]
+                        [% IF ( ms_au ) %]
+                        <option selected="selected" value="au">مؤلف</option>
+                        [% ELSE %]
+                        <option value="au">مؤلف</option>
+                        [% END # /ms_au%]
+                        [% IF ( ms_su ) %]
+                        <option selected="selected" value="su">الموضوع</option>
+                        [% ELSE %]
+                        <option value="su">الموضوع</option>
+                        [% END # /ms_su %]
+                        [% IF ( ms_nb ) %]
+                        <option selected="selected" value="nb">تدمك</option>
+                        [% ELSE %]
+                        <option value="nb">تدمك</option>
+                        [% END # /ms_nb%]
+                        [% IF ( ms_ns ) %]
+                        <option selected="selected" value="ns">تدمد</option>
+                        [% ELSE %]
+                        <option value="ns">تدمد</option>
+                        [% END # /ms_ns%]
+                        [% IF ( ms_se ) %]
+                        <option selected="selected" value="se">السلاسل</option>
+                        [% ELSE %]
+                        <option value="se">السلاسل</option>
+                        [% END # /ms_se %]
+                        [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
+                        [% IF ( ms_callnumcommaphr ) %]
+                        <option selected="selected" value="callnum,phr">رقم الطلب</option>
+                        [% ELSE %]
+                        <option value="callnum,phr">رقم الطلب</option>
+                        [% END #/ms_callnumcommaphr %]
+                        [% ELSE %]
+                        [% IF ( ms_callnum ) %]
+                        <option selected="selected" value="callnum">رقم الطلب</option>
+                        [% ELSE %]
+                        <option value="callnum">رقم الطلب</option>
+                        [% END # /ms_callnum %]
+                        [% END # /IF OPACNumbersPreferPhrase %]
+                    </select>
+                </div> <!-- /.col-sm-auto -->
+                <style>
+                    /* khakdman */
+                    .transl2 {
+                        margin-bottom: 0px !important;
+                    }
+
+                    .div-transl2 {
+
+                        padding-left: 0px !important;
+                        padding-right: 0px !important;
+                        margin-bottom: 0px !important;
+                    }
+
+                    .div-transl2 select {
+                        margin-bottom: 0px !important;
+                    }
+
+                    .search-sm-filter {
+                        display: none;
+                    }
+
+                    @media screen and (max-width: 375px) {
+
+                        #m input,
+                        #m select {
+                            font-size: 4vw;
+                        }
+                    }
+
+                    @media screen and (max-width: 773px) {
+
+                        .search-sm-filter {
+                            display: inherit;
+                        }
+
+                        .search-sm-filter-libarary {
+                            flex: 0 0 33.33%;
+                            max-width: 33.33%;
+                        }
+
+                        .search-sm-filters {
+                            -ms-flex: 0 0 100%;
+                            flex: 0 0 100%;
+                            max-width: 100%;
+                            order: 2;
+                        }
+
+                        .search-sm-filters-order-5 {
+                            -ms-flex: 0 0 100%;
+                            flex: 0 0 100%;
+                            max-width: 100%;
+                            order: 5;
+                        }
+
+                    }
+
+                    /* khakdman */
+                </style>
+                <div class="col order-4 order-sm-3 div-transl2">
+                    [% IF ( ms_value ) %]
+                    <input class="transl1 transl2 form-control" id="translControl1" name="q"
+                        placeholder="ادخل عبارة البحث هنا" title="ادخل عبارة البحث هنا" type="text" autocomplete="off"
+                        value="[% ms_value | html %]" />
+                    <span id="translControl">
+
+                    </span>
+                    [% ELSE %]
+                    <input class="transl1 transl2 form-control" id="translControl1" name="q" autocomplete="off"
+                        placeholder="ادخل عبارة البحث هنا" title="ادخل عبارة البحث هنا" type="text" />
+                    <span id="translControl">
+
+                    </span>
+                    [% END # /ms_value %]
+                    <script>
+                        function auto_complit_responcive(x) {
+                            console.log(x);
+                            if (x.matches) {
+                            document.getElementById('translControl1').setAttribute('autocomplete','off')
+                            }else{
+                            document.getElementById('translControl1').setAttribute('autocomplete','on')
+                            }
+                        }
+
+                        var x = window.matchMedia("(max-width: 900px)")
+                        auto_complit_responcive(x) // Call listener function at run time
+                        x.addListener(auto_complit_responcive) // Attach listener function on state changes 
+                    </script>
+                </div> <!-- /.col -->
+
+                [% IF ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) %]
+                <div class="col-sm-3 col-md-3 col-lg-2 order-3 order-sm-4 div-transl2 search-sm-filters">
+                    <div class="row">
+                        <!-- khakdaman -->
+
+                        <select name="branch_group_limit" id="select_library"
+                            class="form-control col-12  search-sm-filter-libarary">
+                            <option value="">كل المكتبات</option>
+
+                            [% IF LibrarySearchGroups %]<optgroup label="المكتبات">[% END %]
+
+                                [% FOREACH library IN Branches.all( selected => opac_name ) %]
+                                [% IF library.selected %]
+                                <option selected="selected" value="branch:[% library.branchcode | html %]">[%
+                                    library.branchname | html %]</option>
+                                [% ELSE %]
+                                <option value="branch:[% library.branchcode | html %]">[% library.branchname | html %]
+                                </option>
+                                [% END %]
+                                [% END %]
+
+                                [% IF LibrarySearchGroups %]
+                            </optgroup>
+                            <optgroup label="مجموعات">
+                                [% FOREACH lsg IN LibrarySearchGroups %]
+                                [% IF lsg.id == opac_name %]
+                                <option selected="selected" value="multibranchlimit-[% lsg.id | html %]">[% lsg.title |
+                                    html
+                                    %]</option>
+                                [% ELSE %]
+                                <option value="multibranchlimit-[% lsg.id | html %]">[% lsg.title | html %]</option>
+                                [% END # / bc.selected %]
+                                [% END %]
+                            </optgroup>
+                            [% END # / BranchCategoriesLoop %]
+                        </select> <!-- /#select_library -->
+
+                        <select name="idx2" class="form-control col search-sm-filter">
+                            [% IF ( ms_kw ) %]
+                            <option selected="selected" value="">فهرس المكتبة</option>
+                            [% ELSE %]
+                            <option value="">فهرس المكتبة</option>
+                            [% END # /ms_kw %]
+                            [% IF ( ms_ti ) %]
+                            <option selected="selected" value="ti">عنوان</option>
+                            [% ELSE %]
+                            <option value="ti">عنوان</option>
+                            [% END # /ms_ti %]
+                            [% IF ( ms_au ) %]
+                            <option selected="selected" value="au">مؤلف</option>
+                            [% ELSE %]
+                            <option value="au">مؤلف</option>
+                            [% END # /ms_au%]
+                            [% IF ( ms_su ) %]
+                            <option selected="selected" value="su">الموضوع</option>
+                            [% ELSE %]
+                            <option value="su">الموضوع</option>
+                            [% END # /ms_su %]
+                            [% IF ( ms_nb ) %]
+                            <option selected="selected" value="nb">تدمك</option>
+                            [% ELSE %]
+                            <option value="nb">تدمك</option>
+                            [% END # /ms_nb%]
+                            [% IF ( ms_ns ) %]
+                            <option selected="selected" value="ns">تدمد</option>
+                            [% ELSE %]
+                            <option value="ns">تدمد</option>
+                            [% END # /ms_ns%]
+                            [% IF ( ms_se ) %]
+                            <option selected="selected" value="se">السلاسل</option>
+                            [% ELSE %]
+                            <option value="se">السلاسل</option>
+                            [% END # /ms_se %]
+                            [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
+                            [% IF ( ms_callnumcommaphr ) %]
+                            <option selected="selected" value="callnum,phr">رقم الطلب</option>
+                            [% ELSE %]
+                            <option value="callnum,phr">رقم الطلب</option>
+                            [% END #/ms_callnumcommaphr %]
+                            [% ELSE %]
+                            [% IF ( ms_callnum ) %]
+                            <option selected="selected" value="callnum">رقم الطلب</option>
+                            [% ELSE %]
+                            <option value="callnum">رقم الطلب</option>
+                            [% END # /ms_callnum %]
+                            [% END # /IF OPACNumbersPreferPhrase %]
+                        </select>
+                        <select name="limit" class="form-control col search-sm-filter">
+
+                            <option selected="selected" value="">بحث عام</option>               
+                                           
+                            <option value="mc-itemtype,phr:TH">
+                            الرسائل والاطاريح
+                            </option>
+
+                            <option value="mc-itemtype,phr:CR">
+                            السلاسل والمجلات والحوليات
+                            </option>
+
+                            <option value="mc-itemtype,phr:MS">
+                            المخطوطات
+                            </option>
+
+                            <option value="mc-itemtype,phr:MP">
+                            خرائط
+                            </option>
+
+                            <option value="mc-itemtype,phr:BK">
+                            كتاب
+                            </option>
+
+                            <option value="mc-itemtype,phr:CF">
+                            ملف حاسوب
+                            </option>
+
+                        </select>
+                        <!-- /khakdaman -->
+                    </div>
+                </div> <!-- /.col-sm-auto -->
+
+
+
+
+                <!-- khakdaman -->
+                <div class="col-sm-auto  search-sm-filters-order-5 order-5"
+                    style="padding-left: 0px;padding-right: 0px;">
+                    <button type="submit" id="searchsubmit" class="btn btn-warning col-12 ">
+                        <i aria-hidden="true" class="fa fa-search text-white">
+
+                        </i>
+                    </button>
+                </div>
+                [% ELSE %]
+                [% IF ( opac_limit_override ) %]
+                [% IF ( opac_search_limit ) %]
+                [% IF ( multibranchlimit = opac_search_limit.match( 'branch:(multibranchlimit-\d+)' ) ) %]
+                <input name="branch_group_limit" value="[% multibranchlimit.0 | html %]" type="hidden" />
+                [% ELSE %]
+                <input name="limit" value="[% opac_search_limit | html %]" type="hidden" />
+                [% END %]
+                [% END %]
+                [% ELSE %]
+                [% IF ( mylibraryfirst ) %]
+                <input name="limit" value="branch:[% mylibraryfirst | html %]" type="hidden" />
+                [% END %]
+                [% END # / opac_limit_override %]
+                <div class="order-5 col-sm-auto">
+                    <button type="submit" id="searchsubmit" class="btn btn-primary">اذهب</button>
+                </div>
+                [% END # / OpacAddMastheadLibraryPulldown %]
+            </div> <!-- /.form-row -->
+            <input type="hidden" name="weight_search" value="1">
+
+
+
+            <!-- /khakdaman -->
+
+
+
+
+
+
+
+
+            <div class="col-sm-auto order-2 order-sm-2 idx_div idx_div2 " style='padding:0px;'
+                id="main_filter_search_bottom">
+                <input id="ccc" type="radio" name="limit" value="" checked="checked" />
+                <label for="ccc">بحث عام</label>
+
+                [% FOREACH itemtypeloo IN ItemTypes.Get %]
+                <input 
+                id="[% itemtypeloo.itemtype | html %]"
+                type="radio"
+                name="limit"
+                value="[% itemtypeloo.itemtype | html %]"
+                />
+                <label for="[% itemtypeloo.itemtype | html %]">[% itemtypeloo.description | html %]</label>
+                [% END %]
+
+
+
+                <!-- <input id="itemtypephr-0" type="radio" name="limit" value="mc-itemtype,phr:TH">
+                <label for="itemtypephr-0">الرسائل والاطاريح</label>
+
+                
+                <input id="itemtypephr-1" type="radio" name="limit" value="mc-itemtype,phr:CR">
+                <label for="itemtypephr-1">السلاسل والمجلات والحوليات</label>
+
+                
+                <input id="itemtypephr-2" type="radio" name="limit" value="mc-itemtype,phr:MS">
+                <label for="itemtypephr-2">المخطوطات</label>
+
+                
+                <input id="itemtypephr-3" type="radio" name="limit" value="mc-itemtype,phr:MP">
+                <label for="itemtypephr-3">خرائط</label>
+
+                
+                <input id="itemtypephr-4" type="radio" name="limit" value="mc-itemtype,phr:BK">
+                <label for="itemtypephr-4">كتاب</label>
+
+                
+                <input id="itemtypephr-5" type="radio" name="limit" value="mc-itemtype,phr:CF">
+                <label for="itemtypephr-5">ملف حاسوب</label> -->
+
+                
+
+            </div>
+
+
+
+
+        </form>
+        <!-- 
+                        <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform">
+
+
+
+                            <div class="col-sm-auto order-2 order-sm-2 idx_div" style='padding:0px;'>
+                                <input id="rad1" type="radio" name="idx" value="" checked="checked" /><label
+                                    for="rad1"><span class="checkmark"></span> فهرس المكتبة</label>
+                                <input id="rad2" type="radio" name="idx" value="ti" /><label for="rad2"><span
+                                        class="checkmark"></span> عنوان </label>
+                                <input id="rad3" type="radio" name="idx" value="au" /><label for="rad3"><span
+                                        class="checkmark"></span> مؤلف </label>
+                                <input id="rad4" type="radio" name="idx" value="su" /><label for="rad4"><span
+                                        class="checkmark"></span> الموضوع </label>
+                                <input id="rad5" type="radio" name="idx" value="nb" /><label for="rad5"><span
+                                        class="checkmark"></span> تدمك </label>
+                                <input id="rad6" type="radio" name="idx" value="ns" /><label for="rad6"><span
+                                        class="checkmark"></span> السلاسل </label>
+                                <input id="rad7" type="radio" name="idx" value="callnum,phr" /><label for="rad7"><span
+                                        class="checkmark"></span> رقم الطلب </label>
+                            </div>
+                            <div class="form-row align-items-center" id="m">
+                                <div class="col-sm-auto order-1 order-sm-1" style="display:none;">
+                                    <label for="masthead_search">[% UNLESS ( Koha.Preference(
+                                        'OpacAddMastheadLibraryPulldown' ) == 1 ) %] [% IF ( mylibraryfirst ) %] (في [%
+                                        Branches.GetName( mylibraryfirst ) | html %] فقط) [% END %] [% END %]</label>
+                                </div>
+
+                                <div class="col-sm-auto order-2 order-sm-2" style="display:none">
+
+
+
+                                    <select name="idx2" id="masthead_search" class="form-control">
+                                        [% IF ( ms_kw ) %]
+                                        <option selected="selected" value="">فهرس المكتبة</option>
+                                        [% ELSE %]
+                                        <option value="">فهرس المكتبة</option>
+                                        [% END # /ms_kw %]
+                                        [% IF ( ms_ti ) %]
+                                        <option selected="selected" value="ti">عنوان</option>
+                                        [% ELSE %]
+                                        <option value="ti">عنوان</option>
+                                        [% END # /ms_ti %]
+                                        [% IF ( ms_au ) %]
+                                        <option selected="selected" value="au">مؤلف</option>
+                                        [% ELSE %]
+                                        <option value="au">مؤلف</option>
+                                        [% END # /ms_au%]
+                                        [% IF ( ms_su ) %]
+                                        <option selected="selected" value="su">الموضوع</option>
+                                        [% ELSE %]
+                                        <option value="su">الموضوع</option>
+                                        [% END # /ms_su %]
+                                        [% IF ( ms_nb ) %]
+                                        <option selected="selected" value="nb">تدمك</option>
+                                        [% ELSE %]
+                                        <option value="nb">تدمك</option>
+                                        [% END # /ms_nb%]
+                                        [% IF ( ms_ns ) %]
+                                        <option selected="selected" value="ns">تدمد</option>
+                                        [% ELSE %]
+                                        <option value="ns">تدمد</option>
+                                        [% END # /ms_ns%]
+                                        [% IF ( ms_se ) %]
+                                        <option selected="selected" value="se">السلاسل</option>
+                                        [% ELSE %]
+                                        <option value="se">السلاسل</option>
+                                        [% END # /ms_se %]
+                                        [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
+                                        [% IF ( ms_callnumcommaphr ) %]
+                                        <option selected="selected" value="callnum,phr">رقم الطلب</option>
+                                        [% ELSE %]
+                                        <option value="callnum,phr">رقم الطلب</option>
+                                        [% END #/ms_callnumcommaphr %]
+                                        [% ELSE %]
+                                        [% IF ( ms_callnum ) %]
+                                        <option selected="selected" value="callnum">رقم الطلب</option>
+                                        [% ELSE %]
+                                        <option value="callnum">رقم الطلب</option>
+                                        [% END # /ms_callnum %]
+                                        [% END # /IF OPACNumbersPreferPhrase %]
+                                    </select>
+                                </div>
+
+                                <div class="col order-4 order-sm-3">
+                                    [% IF ( ms_value ) %]
+                                    <input class="transl1 form-control" id="translControl1" name="q"
+                                        title="ادخل مصطلح البحث" placeholder="ادخل مصطلح البحث" type="text"
+                                        value="[% ms_value | html %]" /><span id="translControl"></span>
+                                    [% ELSE %]
+                                    <input class="transl1 form-control" id="translControl1" name="q"
+                                        title="ادخل مصطلح البحث" placeholder="ادخل مصطلح البحث" type="text" /><span
+                                        id="translControl"></span>
+                                    [% END # /ms_value %]
+                                </div>
+
+                                [% IF ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) %]
+                                <div class="col-sm col-md-3 col-lg-2 order-3 order-sm-4">
+                                    <select name="branch_group_limit" id="select_library" class="form-control">
+                                        <option value="">كل المكتبات</option>
+
+                                        [% IF LibrarySearchGroups %]<optgroup label="المكتبات">[% END %]
+
+                                            [% FOREACH library IN Branches.all( selected => opac_name ) %]
+                                            [% IF library.selected %]
+                                            <option selected="selected" value="branch:[% library.branchcode | html %]">
+                                                [% library.branchname | html %]</option>
+                                            [% ELSE %]
+                                            <option value="branch:[% library.branchcode | html %]">[% library.branchname
+                                                | html %]</option>
+                                            [% END %]
+                                            [% END %]
+
+                                            [% IF LibrarySearchGroups %]
+                                        </optgroup>
+                                        <optgroup label="مجموعات">
+                                            [% FOREACH lsg IN LibrarySearchGroups %]
+                                            [% IF lsg.id == opac_name %]
+                                            <option selected="selected" value="multibranchlimit-[% lsg.id | html %]">[%
+                                                lsg.title | html %]</option>
+                                            [% ELSE %]
+                                            <option value="multibranchlimit-[% lsg.id | html %]">[% lsg.title | html %]
+                                            </option>
+                                            [% END # / bc.selected %]
+                                            [% END %]
+                                        </optgroup>
+                                        [% END # / BranchCategoriesLoop %]
+                                    </select> 
+                                </div> 
+
+
+
+
+                                <div class="col-sm-auto order-5">
+                                    <button type="submit" id="searchsubmit" class="btn btn-primary"><i
+                                            aria-hidden="true" class="fa fa-search"></i></button>
+                                </div>
+                                [% ELSE %]
+                                [% IF ( opac_limit_override ) %]
+                                [% IF ( opac_search_limit ) %]
+                                [% IF ( multibranchlimit = opac_search_limit.match( 'branch:(multibranchlimit-\d+)' ) )
+                                %]
+                                <input name="branch_group_limit" value="[% multibranchlimit.0 | html %]"
+                                    type="hidden" />
+                                [% ELSE %]
+                                <input name="limit" value="[% opac_search_limit | html %]" type="hidden" />
+                                [% END %]
+                                [% END %]
+                                [% ELSE %]
+                                [% IF ( mylibraryfirst ) %]
+                                <input name="limit" value="branch:[% mylibraryfirst | html %]" type="hidden" />
+                                [% END %]
+                                [% END # / opac_limit_override %]
+                                <div class="order-5 col-sm-auto">
+                                    <button type="submit" id="searchsubmit" class="btn btn-primary">اذهب</button>
+                                </div>
+                                [% END # / OpacAddMastheadLibraryPulldown %]
+                            </div>
+                            <input type="hidden" name="weight_search" value="1">
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="col-sm-auto order-2 order-sm-2 idx_div idx_div2" style='padding:0px;'>
+                                <input id="ccc" type="radio" name="limit" value="" checked="checked" /><label for="ccc">
+                                    كل المواد</label>
+                                    [% $x = 1 %]
+                                        [% FOREACH advsearchloo IN advancedsearchesloop %]
+
+                                        [% IF ($x == 1) %] 
+                                        [% FOREACH itemtypeloo IN advsearchloo.code_loop %]
+                                        [% IF (advsearchloo.advanced_search_type != 'itemtypes') OR (((!itemtypeloo.searchcategory) AND (itemtypeloo.cat == 0)) OR (itemtypeloo.cat == 1)) %]
+                                        
+                                        <input 
+                                        id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]"
+                                        type="radio"
+                                        name="[% IF ( itemtypeloo.cat == 1 ) %]searchcat[% ELSE %]limit[% END %]"
+                                        value="[% IF ( itemtypeloo.cat == 1 ) %][% itemtypeloo.code | html %][% ELSE %]mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %][% END %]"
+                                        />
+                                        <label for="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]">[% itemtypeloo.description | html %]</label>
+
+                                        [% END %]
+                                        [% END %]
+                                        [% END %]
+                                        [% $x = 0 %]
+                                    [% END # / FOREACH advancedsearchesloop %]
+
+                            </div>
+
+
+
+
+                        </form> -->
+        <!-- khakdaman -->
+        <style>
+            #opac-main-search {
+                max-width: 800px;
+                padding: 5px;
+                padding-top: 35px;
+                margin: 0px auto;
+                background: none;
+            }
+
+            .navbar-nav>li>a,
+            .navbar-nav .fa.fa-icon-black {
+                color: #fff;
+            }
+        </style>
+
+
+        <!-- <div id="searchstats" title="عدد المصادر: 1245341">
+            عدد المصادر:
+            1245341
+        </div>-->
+    </div>
+    <!-- khakdaman
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ [% IF news_item %]
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ [% news_item.title | html %]
+ </li>
+ [% ELSE %]
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ [% END %]
+ </ul>
+ </nav>
+ [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
+ [% IF ( loggedinusername ) %]
+ <div id="loggedin" class="container-fluid">
+ [% ELSE %]
+ <div id="notloggedin" class="container-fluid">
+ [% END %]
+ [% ELSE %]
+ <div id="notloggedin" class="container-fluid">
+ [% END %]
+ 
+khakdaman !-->
+
+    <div class="row">
+        [% IF ( OpacNav || OpacNavBottom ) %]
+        <div class="col-12 col-lg-2 order-3 order-lg-1">
+            <div id="navigation">
+                [% INCLUDE 'navigation.inc' %]
+            </div>
+        </div>
+        [% END %]
+
+        [% IF ( OpacNav || OpacNavBottom ) && (Koha.Preference( 'opacuserlogin' ) == 1 || OpacNavRight) %]
+        [% # Three-column layout with right and left sidebars %]
+        <div class="col-12 col-lg-7 order-md-1 maincontent">
+            [% ELSIF (Koha.Preference( 'opacuserlogin' ) == 1 || OpacNavRight) %]
+            [% # Two-column layout with right sidebar %]
+            <div class="col-12 col-lg-9 order-md-1 maincontent">
+                [% ELSIF ( OpacNav || OpacNavBottom ) %]
+                <div class="col-12 col-lg-10 order-md-1 maincontent">
+                    [% ELSE %]
+                    <div class="col order-md-1 maincontent">
+                        [% END %]
+
+                        <h1 class="sr-only">Koha home</h1>
+
+                        [% IF Koha.Preference( 'OpacNewsLibrarySelect' ) %]
+                        [% UNLESS news_item %]
+                        <form id="news-branch-select" class="form-inline" name="news-branch-select" method="get"
+                            action="/cgi-bin/koha/opac-main.pl">
+                            <label for="news-branch">عرض الأخبار لـ :</label>
+                            <select id="news-branch" name="branch">
+                                [% IF ( branchcode == "" ) %]
+                                <option value="" selected="selected">على نطاق النظام فقط</option>
+                                [% ELSE %]
+                                <option value="">على نطاق النظام فقط</option>
+                                [% END %]
+                                [% PROCESS options_for_libraries libraries => Branches.all( selected => branchcode,
+                                unfiltered => 1, ) %]
+                            </select>
+                        </form>
+                        [% END %]
+                        [% END %]
+
+                        [% IF ( koha_news ) %]
+
+                        [% IF single_news_error %]
+
+                        <div class="alert alert-error">
+                            هذا الخبر غير موجود.</div>
+
+                        [% ELSE %]
+
+                        <div id="news" class="newscontainer" style="display:none">
+                            [% SET newsdisp = ( Koha.Preference('NewsAuthorDisplay') ) %]
+                            [% FOREACH koha_new IN koha_news %]
+                            <div class="newsitem">
+                                <h4 class="newsheader">
+                                    [% IF ( news_item ) %]
+                                    [% koha_new.title | html %]
+                                    [% ELSE %]
+                                    <a name="newsitem[% koha_new.idnew | html %]"
+                                        href="/cgi-bin/koha/opac-main.pl?news_id=[% koha_new.idnew | uri %]">[%
+                                        koha_new.title | html %]</a>
+                                    [% END %]
+                                </h4>
+                                <div class="newsbody">[% koha_new.content | $raw %]</div>
+                                <div class="newsfooter">
+                                    نشر في [% koha_new.published_on | $KohaDates %] [% IF ( (newsdisp == 'opac' ||
+                                    newsdisp == 'both') && koha_new.borrowernumber ) %] [% IF news_item %] [% SET author
+                                    = koha_new.author %] بواسطة<span class="newsauthor_title">[% author.title | html %]
+                                    </span>[% author.firstname | html %] [% author.surname | html %] [% ELSE %] بواسطة
+                                    <span class="newsauthor_title">[% koha_new.author_title | html %] </span>[%
+                                    koha_new.author_firstname | html %] [% koha_new.author_surname | html %]
+                                    [% END %]
+                                    [% END %]
+                                    [% IF ( news_item ) %]
+                                    &bull; <a href="/cgi-bin/koha/opac-main.pl">عرض كل الأخبار</a>
+                                    [% END %]
+                                </div>
+                            </div>
+
+                            [% END %]
+                            [% UNLESS news_item %]
+							
+                            <div id="rssnews-container">
+                                <!-- Logged in users have a branch code or it could be explicitly set -->
+                                <a
+                                    href="[% OPACBaseURL | url %]/cgi-bin/koha/opac-news-rss.pl?branchcode=[% branchcode | uri %]">
+                                    <i class="fa fa-rss" aria-hidden="true">
+
+                                    </i>
+                                    [% IF Branches.all.size == 1 %] [% IF branchcode %] تلقيمة RSS لـ [%
+                                    Branches.GetName( branchcode ) | html %] أخبار المكتبة [% ELSE %] تلقيمة RSS لأخبار
+                                    المكتبة [% END %] [% ELSE %] [% IF branchcode %] تلقيمة RSS لـ[% Branches.GetName(
+                                    branchcode ) | html %] وأخبار المكتبة على مستوى النظام [% ELSE %] تلقيمة RSS لأخبار
+                                    المكتبة على مستوى النظام [% END %] [% END %]</a>
+                            </div>
+                            [% END %]
+                        </div>
+
+                        [% END # /IF single_news_error %]
+
+                        [% ELSE %]
+                        <!-- koha news -->
+                        [% IF Koha.Preference( 'OpacNewsLibrarySelect' ) %]
+                        <div id="news" class="newscontainer">
+                            <div class="newsitem">
+                                <div class="newsbody">لا يوجد أخبار للعرض</div>
+                                <div class="newsfooter">
+
+                                </div>
+                            </div>
+                        </div>
+                        [% END %]
+
+                        [% END # IF koha_news %]
+
+                        [% UNLESS news_item # Don't show under single news item %]
+                        [% IF ( daily_quote ) %]
+                        <div id="daily-quote">
+                            <h2>اقتباس اليوم</h2>
+                            <div>
+                                <span id="daily-quote-text">[% daily_quote.text | html %]</span>
+                                <span id="daily-quote-sep"> ~ </span>
+                                <span id="daily-quote-source">[% daily_quote.source | html %]</span>
+                            </div>
+                        </div>
+                        [% END %]
+
+                        [% IF ( OpacMainUserBlock ) %]
+                        <div id="opacmainuserblock">
+                            [% PROCESS koha_news_block news => OpacMainUserBlock %]
+                        </div>
+                        [% END %]
+                        [% END %]
+
+                    </div> <!-- / .col 6/8 -->
+
+
+
+                </div> <!-- /.container-fluid -->
+            </div> <!-- /.row -->
+            <!-- <div id="middle" style="background-color: #e1e1e1;">
+                <div class="container">
+                    <div class="row" style="padding-top: 25px;padding-bottom: 30px;margin-left: -25px !important;">
+                        <div id="majazi-icon" class="mid-icon col-xs-12 col-md-4 pull-right se-hidden">
+                            <a href="/قفسه-مجازی/" class="text-center">
+                                <img src="http://www.lib.ir/design/images/iconright.png" alt="قفسه مجازی کتابخانه ها"
+                                    class="col-12" title="قفسه مجازی کتابخانه ها" />
+                                <div class="desc">فهرست موضوعی منابع کتابخانه ها</div>
+                            </a>
+
+                        </div>
+                        <div id="alefba-icon" class="mid-icon col-xs-12 col-md-4 pull-right se-hidden">
+                            <a href="/فهرست-الفبایی/" class="text-center">
+                                <img src="http://www.lib.ir/design/images/iconcenter.png" alt="فهرست الفبایی کتاب ها"
+                                    class="col-12" title="فهرست الفبایی کتاب ها" />
+                                <div class="desc">جستجو الفبایی در منابع کتابخانه ها</div>
+                            </a>
+
+                        </div>
+                        <div id="mozu-icon" class="mid-icon col-xs-12 col-md-4 pull-right se-hidden">
+                            <a href="/درختواره-موضوعی/" class="text-center">
+                                <img src="http://www.lib.ir/design/images/iconleft.png" alt="درختواره موضوعی"
+                                    class="col-12" title="درختواره موضوعی منابع کتابخانه ها" />
+                                <div class="desc">گـردش مـجـازی در قـفـسـه کتابخانه ها</div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <div id="middle"
+                style="background-image: linear-gradient(to right, rgb(171, 171, 171),#e1e1e1,rgb(171, 171, 171));">
+                <div class="container pt-5 pb-5">
+                    <div class="row mt-3">
+                        <div class="col-md-6 col-sm-12 col-lg-3 mb-2">
+                            <div class="card text-center card py-3 mx-4" 
+                            style="font-font-weight: 700;background-color: #ececec;border-radius: 10px;">
+                                <div class="card-content">
+                                    <div class="card-body py-1">
+                                        <h3 class="line-height-1 mb-50 primary-font" style="color: #1b4984 !important;">354K</h3>
+                                        <div class=" line-ellipsis line-height-2 mb-50" style="color: #1b4984 !important;">الكتب والمخطوطات</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-lg-3 mb-2">
+                            <div class="card text-center card py-3 mx-4" 
+                            style="font-font-weight: 700;background-color: #ececec;border-radius: 10px;">
+                                <div class="card-content">
+                                    <div class="card-body py-1">
+                                        <h3 class="line-height-1 mb-50 primary-font" style="color: #1b4984 !important;">122K</h3>
+                                        <div class=" line-ellipsis line-height-2 mb-50" style="color: #1b4984 !important;">الرسائل والاطاريح </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-lg-3 mb-2">
+                            <div class="card text-center card py-3 mx-4" 
+                            style="font-font-weight: 700;background-color: #ececec;border-radius: 10px;">
+                                <div class="card-content">
+                                    <div class="card-body py-1">
+                                        <h3 class="line-height-1 mb-50 primary-font" style="color: #1b4984 !important;">5K</h3>
+                                        <div class=" line-ellipsis line-height-2 mb-50" style="color: #1b4984 !important;">السلاسل والمجلات</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-lg-3 mb-2">
+                            <div class="card text-center card py-3 mx-4" 
+                            style="font-font-weight: 700;background-color: #ececec;border-radius: 10px;">
+                                <div class="card-content">
+                                    <div class="card-body py-1">
+                                        <h3 class="line-height-1 mb-50 primary-font" style="color: #1b4984 !important;">55K</h3>
+                                        <div class=" line-ellipsis line-height-2 mb-50" style="color: #1b4984 !important;">الـمصادر الـرقميـة</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="bottom">
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col-12 row" style="height: max-content;">
+                            <div class="col-12"
+                                style="background-color: #1b4984;border-top: 4px #848484 solid;text-align: center;">
+                                <h2 style="color: #fff;font-weight: lighter;margin: 4px 0px;font-size: 20px;">
+                                    المكتبات المشاركة
+                                </h2>
+                            </div>
+                            <div class="col-12 row pt-1">
+                                
+                                [% FOREACH library IN Branches.all( selected => opac_name ) %]
+
+                                <div class="col-6 small-12">
+                                    <div class="items">
+                                        <img src=" data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAJCAMAAAAmRK2vAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2RpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDoxRDZGNzgyQUJBMkFFMzExQTVGNUFCRDU2OEZBRUZFNyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozQzEyQzA1QzkwMDQxMUU0QURDREU1RDhEODQyMjQ0MiIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozQzEyQzA1QjkwMDQxMUU0QURDREU1RDhEODQyMjQ0MiIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IFdpbmRvd3MiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGRTEyMEY5QTAwOTBFNDExQjE2Rjg0NTU4NDBGNTRDQSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxRDZGNzgyQUJBMkFFMzExQTVGNUFCRDU2OEZBRUZFNyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PhOZ0PcAAABFUExURbW8vnF9gbi+wP7+/nN/g9/i4+nr6+rs7efp6r/FxrvBw+nr7Ofp6YWPk7m/wYqUl3aChoaQk4SPkpGbnqivsYGLj/////QuYqgAAAAXdFJOU/////////////////////////////8A5kDmXgAAADhJREFUeNpiEAMDBiDm4wRRTIwMQApIMosxMLBwMQPlhAXYQEp4+EU5QCrZeYVYQSq5BUXEAAIMAGbjA0CPSCnVAAAAAElFTkSuQmCC" />
+                                        <a class="link-a" href="/cgi-bin/koha/opac-library.pl?branchcode=[% library.branchcode | html %]">[% library.branchname | html %]</a>
+                                    </div>
+                                </div>
+                                [% END %]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 
+            <div id="footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 pull-right" style="padding-top: 85px;">
+                            <img src="http://www.lib.ir/design/images/footright.png" id="footer-right"
+                                alt="این پایگاه متعلق به مؤسسه علمی - فرهنگی دارالحدیث است. مسئولیت صحت اطلاعات کتابخانه هاو حقوق معنوی اطلاعات نیز متعلّق به آنها است."
+                                title="این پایگاه متعلق به مؤسسه علمی - فرهنگی دارالحدیث است. مسئولیت صحت اطلاعات کتابخانه هاو حقوق معنوی اطلاعات نیز متعلّق به آنها است." />
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 pull-right">
+                            <img src="http://www.lib.ir/design/images/footleft.png" id="footer-left"
+                                alt="برترین جستجوگر - پنجمین جشنواره رسانه های دیجیتال"
+                                title="برترین جستجوگر - پنجمین جشنواره رسانه های دیجیتال" />
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+            <style>
+                #footer {
+                    background: #054264 url(/design/images/footbg.png) repeat-x;
+                    min-height: 233px;
+                }
+
+                #footer .container {
+                    padding-top: 33px;
+                    color: #fff;
+                }
+
+                #bottom {
+                    border-top: solid 1px #a6a9a9;
+                }
+
+                #bottom .bot-part .items {
+                    padding-top: 15px;
+                    padding-bottom: 40px;
+                }
+
+                #bottom .bot-part .items>div {
+                    padding-top: 5px;
+                    padding-bottom: 5px;
+                    max-height: 25px;
+                    overflow: hidden;
+                }
+
+                #bottom .bot-part .items>div>img {
+                    padding-left: 10px;
+                }
+
+                .link-a {
+                    color: #428bca !important;
+                    text-decoration: none;
+                    font-weight: lighter !important;
+                }
+            </style>
+        </div> <!-- /.main -->
+
+        [% INCLUDE 'opac-bottom.inc' %]
+        [% BLOCK jsinclude %][% END %]
+    </div>
+</div>

@@ -1,0 +1,263 @@
+[% USE Koha %]
+[% USE Branches %]
+[% USE ItemTypes %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Advanced search &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+<style>
+.title_summary{
+	background-color: #f0f3f3;
+	border:1px solid;
+	margin:5px;
+	padding:5px
+}
+
+</style>
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='advsearch' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<body id="cat_z3950_search" class="cat">
+
+
+<div class="container-fluid">
+
+<nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ 
+ 
+ <li class="breadcrumb-item active" aria-current="page">
+ 
+ <a href="#" title="">نتائج البحث لـ '[% ms_value | html %]'</a>
+ 
+ </li>
+ 
+ 
+<!-- added -->
+ 
+ 
+ 
+ <li class="breadcrumb-item active" aria-current="page">
+    <a href="#">[% numresults | html %] نتيجة.
+    </a>
+</li>
+ 
+ 
+ 
+<!-- end add -->
+
+ </ul>
+ </nav>
+
+
+<div class='row'>
+<div class="col-lg-10 order-first order-md-first order-lg-2 maincontent">
+
+<div id="toolbar" class="toolbar row align-items-center">
+<nav aria-label="ترقيم صفحات نتائج البحث" class="pagination pagination-sm noprint" id="nav_paginaition"
+    style="overflow-x: auto;">
+      
+        <ul class="pagination" style="overflow: auto;">
+			<li class="page-item ">
+                <a aria-label="اذهب إلى صفحة اول" class="page-link"
+                    href="/cgi-bin/koha/result.pl?[% first_page %]"> اول</a>
+            </li>
+			<li class="page-item ">
+                <a aria-label="اذهب إلى صفحة اول" class="page-link"
+                    href="/cgi-bin/koha/result.pl?[% previous_page  %]"> سابق</a>
+            </li>
+
+		[% FOREACH PAGE IN paging %]
+			<li class="page-item [% IF PAGE.selected == 1 %] active [%END%]">
+                <a aria-label="اذهب إلى صفحة [% PAGE.num | html %]" class="page-link"
+                    href="/cgi-bin/koha/result.pl?[% PAGE.url  %]">[% PAGE.num  %]</a>
+            </li>
+		[% END %]
+
+			<li class="page-item ">
+                <a aria-label="اذهب إلى صفحة اول" class="page-link"
+                    href="/cgi-bin/koha/result.pl?[%  next_page %]"> تالی</a>
+            </li>
+			<li class="page-item ">
+                <a aria-label="اذهب إلى صفحة اول" class="page-link"
+                    href="/cgi-bin/koha/result.pl?[% last_page  %]">آخر </a>
+            </li>
+
+
+
+		</ul>
+       
+</nav>
+
+
+
+<div class="col-lg-2">
+
+<select id="sort_by" class="resort form-control form-control-sm" name="sort_by" onchange="change_sort()">
+ <option value="relevance">الصلة</option>
+<optgroup label="الشعبية:">
+ 
+ <option value="popularity_dsc">الشعبية (أكثر إلى أقلّ) </option>
+ 
+ 
+ <option value="popularity_asc">الشعبية (أقلّ إلى أكثر) </option>
+ 
+</optgroup>
+<optgroup label="مؤلف">
+ 
+ <option value="author_az">المؤلف (A-Z)</option>
+ 
+ 
+ <option value="author_za">المؤلف (Z-A)</option>
+ 
+</optgroup>
+<optgroup label="رقم الطلب">
+ 
+ <option value="call_number_asc">رقم الطلب (Z-A to 9-0)</option>
+ 
+ 
+ <option value="call_number_dsc">رقم الطلب (Z-A to 9-0)</option>
+ 
+</optgroup>
+<optgroup label="تواريخ">
+ 
+ <option value="pubdate_dsc">تاريخ النشر/حقوق الطبع والنشر:الاحدث الى الاقدم</option>
+ 
+ 
+ <option value="pubdate_asc">تاريخ النشر / حقوق الطبع والنشر  : الأقدم إلى الأحدث</option>
+ 
+ 
+ <option value="acqdate_dsc">تاريخ التزويد: من الاحدث الى الاقدم</option>
+ 
+ 
+ <option value="acqdate_asc">تاريخ التزويد: من الاقدم الى الاحدث</option>
+ 
+</optgroup>
+<optgroup label="عنوان">
+ 
+ <option value="title_az">عنوان (A-Z)</option>
+ 
+ 
+ <option value="title_za">عنوان (Z-A)</option>
+ 
+</optgroup>
+
+ </select>
+
+<script>
+function change_sort(){
+    href =location.href;
+    href = href.replace(/\&sort_by=.*/,'')
+    location.href=href+ '&sort_by='+ sort_by.value
+}
+</script>
+
+</div>
+
+</div>
+
+
+<div id="" style="background-color:#f7f8fa;padding:5px 0px;">
+[% FOREACH record IN result %]
+<div class="m-2 card border">
+    
+<div class="card-header">
+<input class="cb" id="bib656758" name="biblionumber" type="checkbox" value="/cgi-bin/koha/opac-image.pl?thumbnail=1&amp;biblionumber=656758"> <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% record.field('999').subfield('c')%]" class="title">[% record.title %]</a>
+</div><div class="m-2">
+<div class="coverimages itemtype_BK"><img class="thumbnail" src="/cgi-bin/koha/opac-image.pl?thumbnail=1&amp;biblionumber=656758"></div>
+<p><a href="#"><span class="byAuthor">بواسطة </span><span class="author">[% record.author %]<span class="relatorcode"> [مولف.]</span>.</span></a></p>
+<span class="results_summary edition"><span class="label">الطبعات: </span>[% record.edition %]</span><span class="results_summary type"><span class="results_material_type"><span class="label">نوع المادة: </span><img alt="نص" class="materialtype mt_icon_BK" src="/opac-tmpl/lib/famfamfam/BK.png">
+ [% ItemTypes.GetDescription (record.field('942').subfield('c'))%] </span><span class="results_contents_literary"><span class="label">؛ الشكل الأدبي:</span>
+ غير أدبي</span></span>تاریخ النشر:<span class="results_summary rda264">[% record.publication_date %]</span><span class="results_summary other_title"><span class="label">عنوان آخر: </span>[% record.title_proper %]<span class="results_summary availability"><span class="label">الإتاحة: </span><span class="available reallyavailable"><span class="AvailabilityLabel"><strong>المواد المتاحة للإعارة:</strong></span><span class="ItemSummary"><span class="ItemBranch">[% Branches.GetName( 'IHL' ) %]</span> (1) . </span></span></span>
+</div>
+ <div class="itypecol">
+ 
+ <img src="/opac-tmpl/bootstrap/itemtypeimg/bridge/book.png" title="كتاب" alt="كتاب">
+ 
+ 
+ </div>
+
+ </div>
+[% END %]
+</div>
+
+
+</div><!-- maincontent -->
+
+<div class="col-lg-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[% Branche = Branches.all()%]
+
+
+
+<div id="facetcontainer">
+
+<div id="search-facets">
+    <h2><a href="#" class="menu-collapse-toggle">تنقيح بحثك</a></h2>
+    <ul class="menu-collapse">
+    [% FOREACH facet IN facets.getElementsByTagName('facet')%]
+        <li class="availability_facet">
+        <h3 id="facet-availability">[% facet.getAttribute('index') %]</h3>
+            <ul>
+            [% FOREACH t IN facet.getElementsByTagName('term') %]
+                <li><a class="facet_link" title='limit_[% facet.getAttribute('index') %]=[% t.textContent %]' onclick="return check_link(this)" href='?[%query_cgi%]&limit_[% facet.getAttribute('index') %]=[% t.textContent %]'>[% t.textContent %] ([% t.getAttribute('occur') %])[%t.getAttribute('coccur')%]</a></li>
+            [% old_coccur=t.getAttribute('coccur') %]
+            [%END%]
+
+            </ul>
+        </li>
+    [%END%]
+    <ul>
+</div>
+</div>
+
+
+
+
+</div> <!-- row -->
+</div>
+ <script>
+        function check_link(obj){
+            url = decodeURI('[%query_cgi%]');
+            if (url.search(obj.title)>0){
+                return false
+            }
+        }
+                
+
+
+        /*$('.facet_link').each(function(i,o){
+            console.log(i,o)
+        })*/
+    </script>
+</body>
+</html>
+[% MACRO jsinclude BLOCK %]
+
+ <script>
+        $(document).ready(function(){
+            alert(1);
+        });
+    </script>
+[% END %]
+
+[% BLOCK jsinclude %]
+[% END %]

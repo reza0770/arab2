@@ -1,0 +1,85 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>An error has occurred &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+<body id="error[% errno | html %]" class="error">
+[% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="#">خطأ [% errno | html %]</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+ <div id="errormsg[% errno | html %]">
+ <h1>عذرا،الصفحة المطلوبة غير متاحة</h1>
+ <h2>خطأ [% errno | html %]</h2>
+ <p><strong>يمكن أن يكون لهذه الرسالة الأسباب التالية:</strong></p>
+ <ul>
+ [% IF ( errno == 400 ) %]
+ <li>الرابط مكسور والصفحة غير موجودة.</li>
+ [% END %]
+
+ [% IF ( errno == 401 ) %]
+ <li>ليس لديك الصلاحية لمشاهدة هذه الصفحة.</li>
+ [% END %]
+
+ [% IF ( errno == 402 ) %]
+ <li>الرابط غير صحيح</li>
+ [% END %]
+
+ [% IF ( errno == 403 ) %]
+ <li>ليس مسموح لك مشاهدة هذه الصفحة.</li>
+ [% END %]
+
+ [% IF ( errno == 404 ) %]
+ <li>لقد استخدمت رابطاً خارجياً لمادة في الفهرس لم تعد متاحة</li>
+ <li>لقد قمت بتتبع رابط مهمل مثال: من محرك بحث أو إشارة مرجعية</li>
+ <li>لقد حاولت الوصول إلى صفحة تحتاج التحقق.</li>
+ <li>يوجد رابط داخلي مكسور في صفحة فهرسنا الرئيسية والصفحة غير موجودة.</li>
+ [% END %]
+ [% IF ( errno == 500 ) %]
+ <li>.حدث خطأ اثناء محاولة معالجة طلبك</li>
+ [% END %]
+ </ul>
+ <h2>ما التالي؟</h2>
+ <ul>
+ [% IF ( errno == 401 ) && ( Koha.Preference( 'opacuserlogin' ) == 1 ) %]
+ <li>الرجاء تسجيل الدخول في الفهرس ثم المحاولة مرة أحرى.<a href="/cgi-bin/koha/opac-user.pl">صفحة الدخول</a></li>
+ [% END %]
+ <li>يمكنك استخدام القائمة والروابط في أعلى هذه الصفحة</li>
+ <li>يمكنك بحث فهرسنا باستخدام نموذج البحث أعلى هذه الصفحة.</li>
+ <li><a href="/cgi-bin/koha/opac-main.pl">العودة الى صفحة الفهرس الرئيسية</a></li>
+ </ul>
+ <h2>التبليغ عن الروابط المكسورة والمشاكل</h2>
+ <ul>
+ <li>للتبليغ عن هذا الخطأ، يرجى الاتصال بمدير كوها<a href="mailto:[% admin | uri %]">أرسل بريد الكتروني</a>.</li>
+ </ul>
+ </div> <!-- / #errormsg[% errno | html %] -->
+ </div> <!-- / .col-lg10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

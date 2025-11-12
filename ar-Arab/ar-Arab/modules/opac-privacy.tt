@@ -1,0 +1,152 @@
+[% USE Koha %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Your privacy management &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-privacy' %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ </li>
+ <li class="breadcrumb-item" aria-current="page">
+ <a href="#">إدارة خصوصيتك</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
+ </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+
+ <div id="userprivacy" class="maincontent">
+ <h1>إدارة خصوصيتك</h1>
+
+ [% IF deleted %]
+ <div class="alert alert-success">تم حذف سجل إعاراتك.</div>
+ [% ELSIF history_not_deleted %]
+ <div class="alert alert-warning">لقد فشل حذف سجل إعاراتك بسبب وجود مشكلة في تهيئة هذه الخاصية. يرجى تقديم المساعدة في إصلاح النظام عن طريق إعلام مكتبتك بهذا الخطأ. </div>
+ [% ELSIF nothing_to_delete %]
+ <div class="alert alert-warning">لا يوجد سجل إعارة لحذفه</div>
+ [% END %]
+
+ [% IF ( privacy_updated ) %]
+ <div class="alert alert-success">تم تحديث قواعد خصوصيتك</div>
+ [% END %]
+
+ [% IF ( Ask_data ) %]
+ <p>نحرص كل الحرص على حماية خصوصيتك. من هذه الشاشة، يمكنك تحديد المدة التي نحتفظ فيها بسجل إعاراتك.</p>
+ <p>الخيارات المتاحة أمامك <p>
+ <ul id="opac-privacy-options-list">
+ <li class="privacy0">دائماً: الاحتفاظ بسجل إعاراتي بدون حدود. هذا هو الخيار للمستخدمين الذين يرغبون في تتبع ما يقومون بقرائته.</li>
+ <li class="privacy1">الافتراضي: الاحتفاظ بسجل إعاراتي وفقا للقوانين الداخلية. هذا هو الخيار الافتراضي: ستحتفظ المكتبة بسجل إعاراتك للمدة التي تسمح بها القوانين الداخلية.</li>
+ <li class="privacy2">مطلقاً: قم فوراً بحذف سجل إعاراتي. سيؤدي ذلك إلى حذف كل تسجيلات المواد التي تمت إعارتها لك فور ردها.</li>
+ </ul>
+ <p id="note1">يرجى ملاحظة أن المعلومات عن أي كتاب لا يزال معار على النظام  يجب أن تحتفظ بها مكتبة بغض النظر عن الخيار الذي تختاره الخصوصية.</p>
+ <p id="note2">كما يرجى ملاحظة أن العاملين في مكتبة لا يمكن تحديث هذه القيم الخاصة بك: انها خصوصيتك!</p>
+ <form action="/cgi-bin/koha/opac-privacy.pl" method="post" id="opac-privacy-update-form">
+ <input type="hidden" name="op" value="update_privacy" />
+ <fieldset>
+ <label for="privacy">الرجاء اختيار قاعدة خصوصيتك:</label>
+ <div class="form-group row">
+ <div class="col-6">
+ <select class="form-control" name="privacy" id="privacy">
+ [% IF ( privacy0 ) %]
+ <option value="0" selected="selected" class="privacy0">دائما</option>
+ [% ELSE %]
+ <option value="0" class="privacy0">دائما</option>
+ [% END %]
+ [% IF ( privacy1 ) %]
+ <option value="1" selected="selected" class="privacy1">إفتراضى</option>
+ [% ELSE %]
+ <option value="1" class="privacy1">إفتراضى</option>
+ [% END %]
+ [% IF ( privacy2 ) %]
+ <option value="2" selected="selected" class="privacy2">مطلقاً</option>
+ [% ELSE %]
+ <option value="2" class="privacy2">مطلقاً</option>
+ [% END %]
+ </select>
+ </div> <!-- /.col-6 -->
+ </div> <!-- /.form-group.row -->
+
+ [% IF has_guarantor_flag && (Koha.Preference('AllowPatronToSetCheckoutsVisibilityForGuarantor') || Koha.Preference('AllowPatronToSetFinesVisibilityForGuarantor') ) %]
+ [% IF Koha.Preference('AllowPatronToSetCheckoutsVisibilityForGuarantor') %]
+ <div class="form-group row">
+ <div class="col-6">
+ <label for="privacy_guarantor_checkouts">السماح لولي أمرك بمشاهدة استعاراتك الحالية؟</label>
+ <select class="form-control" name="privacy_guarantor_checkouts">
+ [% IF borrower.privacy_guarantor_checkouts %]
+ <option value="0">لا</option>
+ <option value="1" selected>نعم</option>
+ [% ELSE %]
+ <option value="0" selected>لا</option>
+ <option value="1">نعم</option>
+ [% END %]
+ </select>
+ </div> <!-- /.col-6 -->
+ </div> <!-- /.form-group.row -->
+ [% END # /IF Koha.Preference('AllowPatronToSetCheckoutsVisibilityForGuarantor') %]
+
+ [% IF Koha.Preference('AllowPatronToSetFinesVisibilityForGuarantor') %]
+ <div class="form-group row">
+ <div class="col-6">
+ <label for="privacy_guarantor_fines">السماح لكفيلك بعرض غراماتك الحالية؟</label>
+ <select class="form-control" name="privacy_guarantor_fines">
+ [% IF borrower.privacy_guarantor_fines %]
+ <option value="0">لا</option>
+ <option value="1" selected>نعم</option>
+ [% ELSE %]
+ <option value="0" selected>لا</option>
+ <option value="1">نعم</option>
+ [% END %]
+ </select>
+ </div> <!-- /.col-6 -->
+ </div> <!-- /.form-group.row -->
+ [% END %]
+
+ <span class="hint">
+ مضمون بواسطة [% FOREACH gr IN borrower.guarantor_relationships %] [% SET g = gr.guarantor %] [% g.firstname | html %] [% g.surname | html %] [%- IF ! loop.last %], [% END %] [% END %]</span>
+ [% END # /IF has_guarantor_flag.. %]
+ <fieldset class="action">
+ <button type="Submit" class="btn btn-primary">إحفظ</button>
+ </fieldset>
+ </fieldset>
+ </form> <!-- /#opac-privacy-update-form -->
+
+ <hr />
+
+ <h2>حذف فوري</h2>
+
+ <form action="/cgi-bin/koha/opac-privacy.pl" method="post" id="opac-privacy-delete-form">
+ <input type="hidden" name="op" value="delete_record" />
+ <p>مهما كانت قاعدة الخصوصية التي تختارها، يمكنك حذف سجل إعارتك بالكامل على الفور بالنقر هنا.<strong>كن على حذر</strong>. وبمجرد تأكيد الحذف، لا يمكن لأحد استرداد قائمة!</p>
+ <fieldset class="action">
+ <input class="btn btn-danger" onclick="return confirmDelete(MSG_CONFIRM_AGAIN);" type="submit" value="حذف فوري" />
+ </fieldset>
+ </form>
+
+ [% IF Koha.Preference('StoreLastBorrower') %]
+ <p id="store-last-borrower-msg">الرجاء ملاحظة أن آخر شخص قام باعادة مادة ما سوف يتم متابعته من أجل ادارة المواد المسترجعة وبها ضرر.</p>
+ [% END %]
+ [% END # / IF Ask_data %]
+ </div> <!-- / .userprivacy -->
+ </div> <!-- / .col-lg-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+</div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

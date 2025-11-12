@@ -1,0 +1,95 @@
+[% USE KohaDates %]
+
+[% IF enrollments %]
+
+ <h2>الأندية المشترك بها حاليا</h2>
+
+ <table id="clubs-table-enrolled" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th>إسم</th>
+ <th>الوصف</th>
+ <th>تاريخ التسجيل</th>
+ <th>&nbsp;</th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH e IN enrollments %]
+ <tr>
+ <td>[% e.club.name | html %]</td>
+ <td>[% e.club.description | html %]</td>
+ <td>[% e.date_enrolled | $KohaDates %]</td>
+ <td>
+ [% IF e.club.club_template.is_enrollable_from_opac %]
+ <button class="btn btn-xs btn-default" onclick="cancelEnrollment( [% e.id | html %] )">
+ <i class="fa fa-remove" aria-hidden="true"></i> الغاء الاشتراك</button>
+ [% ELSE %] اتصال بمكتبتك لالغاء الاشتراك في هذا النادي. [% END %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+[% END %]
+
+[% IF clubs %]
+
+ <h2>الأندية التي يمكنك الاشتراك بها</h2>
+
+ <table id="clubs-table-unenrolled" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th>إسم</th>
+ <th>الوصف</th>
+ <th>&nbsp;</th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH c IN clubs %]
+ <tr>
+ <td>[% c.name | html %]</td>
+ <td>[% c.description | html %]</td>
+ <td>
+ [% IF !c.club_template.is_email_required || ( c.club_template.is_email_required && borrower.first_valid_email_address ) %]
+ <button class="btn btn-xs btn-default" onclick="loadEnrollmentForm([% c.id | html%])">
+ <i class="fa fa-plus" aria-hidden="true"></i> تسجيل</button>
+ [% ELSE %]
+ <span class="hint">يجب أن يكون لديك عنوان بريد الكتروني للاشتراك</span>
+ [% END %]
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+[% END %]
+
+<script>
+function loadEnrollmentForm( id ) {
+    $("body").css("cursor", "progress");
+    $('#opac-user-clubs').load('/cgi-bin/koha/clubs/enroll.pl?borrowernumber=[% borrower.borrowernumber | html %]&id=' + id, function() {
+        $("body").css("cursor", "default");
+    });
+
+    return false;
+}
+
+function cancelEnrollment( id ) {
+    $("body").css("cursor", "progress");
+    $.ajax({
+        type: "POST",
+        url: '/cgi-bin/koha/svc/club/cancel_enrollment',
+        data: { id: id },
+        success: function( data ) {
+            if ( data.success ) {
+                $('#opac-user-clubs').load('/cgi-bin/koha/clubs/clubs-tab.pl?borrowernumber=[% borrower.borrowernumber | html %]', function() {
+                    $("body").css("cursor", "default");
+                });
+            } else {
+                alert(_(" لايمكن الغاء الاشتراك!"));
+            }
+        },
+        dataType: 'json'
+    });
+    return false;
+}
+</script>

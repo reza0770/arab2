@@ -1,0 +1,63 @@
+[% USE Koha %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Discharge &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+<body id="opac-discharge" class="scrollto">
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="#">إخلاء الطرف</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
+ </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ <div id="discharge" class="maincontent">
+ <h1>إخلاء الطرف</h1>
+ [% FOR message IN messages %]
+ <div class="dialog [% message.type | html %]">
+ [% IF message.code == "unable_to_generate_pdf" %] لقد حدث خطأ أثناء توليد ملف ال pdf . يرجى الاتصال بالموظفين لحل هذه المشكلة . [% END %]</div>
+ [% END %]
+
+ [% IF success %]
+ <p>تم إرسال طلب إخلاء الطرف الخاص بك. سيكون إخلاء الطرف الخاص بك متاحاً في هذه الصفحة خلال عدة أيام.</p>
+ [% ELSIF available %]
+ <a href="/cgi-bin/koha/opac-discharge.pl?op=get">الحصول على إخلاء الطرف الخاص بك</a></li>
+ [% ELSIF pending %]
+ <p>سيكون إخلاء الطرف الخاص بك متاحاً خلال عدة أيام.</p>
+ [% ELSIF has_issues %]
+ <p>لا يمكن عمل إخلاء لك، لقد قمت باستعارة مواد. يرجى إعادة المواد قبل طلب الإخلاء.</p>
+ [% ELSIF not messages %]
+ <h2>ما هو الإخلاء؟</h2>
+ <p>تشهد هذه الوثيقة بأنك قمت بإعادة كل المواد المعارة. يتم السؤال أحيانا أثناء نقل ملف من مدرسة إلى أخرى. يتم إرسال الإخلاء من طرفنا إلى مدرستك. كما ستجده متاحاً في حساب قارئك.</p>
+ <p><strong>تحذير</strong>:يصح هذا الطلب فقط إذا كان موقفك جيدا مع المكتبة. بمجرد القيام بالطلب، لا يمكنك استعارة مواد المكتبة.</p>
+ [% IF has_checkouts %]
+ <div class="alert alert-info">لا يمكن عمل إخلاء لك، لقد قمت باستعارة مواد. يرجى إعادة المواد قبل طلب الإخلاء.</div>
+ [% ELSE %]
+ <a class="btn btn-primary" href="/cgi-bin/koha/opac-discharge.pl?op=request">طلب الإعفاء</a>
+ [% END %]
+
+ [% END %]
+ </div> <!-- / #discharge -->
+ </div> <!-- / .col-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+</div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %][% END %]

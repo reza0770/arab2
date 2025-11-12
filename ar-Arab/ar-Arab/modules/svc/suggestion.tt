@@ -1,0 +1,52 @@
+[% IF (render=='standalone') %]
+ [% USE Koha %]
+ [% INCLUDE 'doc-head-open.inc' %]
+ <title>اقتراحات البحث</title>
+ [% INCLUDE 'doc-head-close.inc' %]
+ [% BLOCK cssinclude %][% END %]
+ </head>
+ <body id="opac-suggestion" class="opac">
+ [% INCLUDE 'masthead.inc' %]
+
+ <div class="main">
+ <ul class="breadcrumb">
+ <li><a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a></li>
+ <li><a href="#">اقتراحات البحث</a></li>
+ </ul>
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ <div class="col-lg-2">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' %]
+ </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ [% ELSE %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% END %]
+ <div id="searchsuggestions">
+ <h1 class="title">اقتراحات</h1>
+[% END %]
+
+[% IF suggestions && suggestions.size %]
+ <div>
+ <span class="suggestionlabel">هل تقصد:</span>
+ [% FOREACH suggestion IN suggestions %]
+ <span class="searchsuggestion"><a href="/cgi-bin/koha/opac-search.pl?q=[% suggestion.search |uri %]">[% suggestion.label | html %]</a></span>
+ [% END %]
+ </div>
+[% ELSE %]
+ <span class="nosuggestions">عذراً، لا توجد مقترحات.</span>
+[% END %]
+
+[% IF (render=='standalone') %]
+ </div> <!-- / #searchsuggestions -->
+ </div> <!-- / .span10/12 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+ </div> <!-- / .main -->
+ [% INCLUDE 'opac-bottom.inc' %]
+ [% BLOCK jsinclude %][% END %]
+[% END %]

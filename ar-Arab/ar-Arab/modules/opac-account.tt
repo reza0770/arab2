@@ -1,0 +1,163 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE AuthorisedValues %]
+[% USE Price %]
+[% SET ENABLE_OPAC_PAYMENTS = payment_methods %]
+[% SET DISPLAY_PAYMENT_BLOCK = 0 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Your charges &rsaquo; [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+ [% Asset.css("css/datatables.css") | $raw %]
+[% END %]
+</head>
+
+[% INCLUDE 'bodytag.inc' bodyid='opac-account' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+ <nav aria-label="التكوين التفصيلي (فتات الخبز)">
+ <ul class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">الصفحة الرئيسية</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ </li>
+ <li class="breadcrumb-item active" aria-current="page">
+ <a href="#">رسومك</a>
+ </li>
+ </ul>
+ </nav>
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation">
+ [% INCLUDE 'navigation.inc' IsPatronPage=1 %]
+ </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+ <div id="useraccount" class="maincontent">
+
+ <h1>الرسوم</h1>
+ [% IF message %]
+ <div class="alert alert-info">
+ [% IF message == 'valid_payment' %]
+ <p>تم استلام الدفعة بقيمة $[% message_value | html %] بنجاح!</p>
+ [% ELSIF message == 'duplicate_payment' %]
+ <p>دفع بمعرف العملية '[% message_value | html %]' تم نشره بالفعل على الحساب</p>
+ <p>للمزيد من المعلومات رجاءاً اتصل بمكتبتك.</p>
+ [% ELSIF message == 'invalid_payment' %]
+ <p>معرف العملية  '[% message_value | html %]'  لهذا الدفع غير صحيح</p>
+ <p>للمزيد من المعلومات رجاءاً اتصل بمكتبتك.</p>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF payment_error %]
+ <div id="error" class="alert alert-warning">
+ <p><strong>خطأ:</strong> هــناك مشكلة خلال معالجة دفعتك</p>
+ </div>
+ [% ELSIF payment %]
+ <div class="alert alert-info">
+ <p><strong>تم تقديم الدفعة:</strong> تم تطبيق مبلغ [% payment | html %]  الذي قمت بدفعه في حسابك</p>
+ </div>
+ [% END %]
+
+ [% PROCESS 'account-table.inc' ACCOUNT_LINES = ACCOUNT_LINES, ENABLE_OPAC_PAYMENTS = ENABLE_OPAC_PAYMENTS, plugins = plugins %]
+
+ </div> <!-- / #useraccount -->
+ </div> <!-- / .col-10 -->
+ </div> <!-- / .row -->
+ </div> <!-- / .container-fluid -->
+</div> <!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% INCLUDE 'datatables.inc' %]
+<script>
+$( document ).ready(function() {
+
+    var MSG_MIN_THRESHOLD = _("الحد الأدنى للمبلغ المطلوب لهذه الخدمة هو %s");
+    var txtActivefilter = _("تنقيح عمليات الدفع");
+    var txtInactivefilter = _("عرض كل العمليات");
+
+    var fines_table = $("#finestable").dataTable($.extend(true, {}, dataTablesDefaults, {
+         [% IF ENABLE_OPAC_PAYMENTS %]
+         "order": [[ 1, "desc" ]],
+         [% ELSE %]
+         "order": [[ 0, "desc" ]],
+         [% END %]
+         "dom": '<"#filter_p">',
+    } ));
+
+    $("#filter_p").html('<p><a href="#" id="filter_paid"><i class="fa fa-filter" aria-hidden="true"></i> '+txtActivefilter+'</a>');
+    $('#filter_paid').click(function(e) {
+        e.preventDefault();
+        if ($(this).hasClass('filtered')) {
+            var filteredValue = '';
+            $(this).html('<i class="fa fa-filter" aria-hidden="true"></i> '+txtActivefilter);
+        } else { //Not filtered. Let's do it!
+            var filteredValue = '^((?!0.00).*)$'; //Filter not matching 0.00 http://stackoverflow.com/a/406408
+            $(this).html('<i class="fa fa-filter" aria-hidden="true"></i> '+txtInactivefilter);
+        }
+        fines_table.fnFilter(filteredValue, -1, true, false);
+        $(this).toggleClass('filtered');
+    });
+
+    //Start filtered
+    $('#filter_paid').click();
+
+    $(".pay-online").removeClass("hidden");
+
+    $("#amount-to-pay-label").hide();
+
+    $(".checkbox-pay, input[name='payment_method']").change( function() {
+        // Disable the pay button if no fees are selected
+        //$("#submit-pay").prop("disabled", ! $(".checkbox-pay:checked").length );
+
+        // Calculate the total amount to be paid based on selected fees
+        var total = 0;
+        $(".checkbox-pay").each( function() {
+            if ( $(this).is(":checked") ) {
+                var id = this.id.split("checkbox-pay-")[1];
+                total += parseFloat( $("#amount-" + id).val() );
+            }
+        });
+
+        var p = Promise.resolve();
+        if ( total ) {
+            p = Promise.all(
+                $('input[name="payment_method"]').map(function() {
+                    var self = this;
+                    return new Promise(function(resolve, reject) {
+                        var threshold = $(self).data('threshold');
+                        var help = $(self).parent().siblings('.help-block');
+                        if(!threshold || threshold == '' || threshold <= total) {
+                            $(self).prop('disabled', false);
+                            help.addClass('hide');
+                        } else {
+                            $(self).prop('disabled', true);
+                            help.html(MSG_MIN_THRESHOLD.format(parseInt(threshold,10).toFixed(2))).removeClass('hide');
+                        }
+                        resolve();
+                    })
+                }).toArray()
+            );
+
+            $("#amount-to-pay").html( total.toFixed(2) );
+            $("#amount-to-pay-label").show();
+        } else {
+            $('input[name="payment_method"]').prop('disabled', false).parent().siblings('.help-block').addClass('hide');
+            $("#amount-to-pay-label").hide();
+        }
+        p.then(function() {
+            $("#submit-pay").prop("disabled", ! $(".checkbox-pay:checked").length || ! $('input[name="payment_method"]:checked:not(:disabled)').length);
+        })
+    });
+});
+</script>
+[% END %]
